@@ -1,7 +1,7 @@
 
 public class WesterosWorld {
-	private static String[][] world; //2D array representing the grid
-	private static int capacityOfDG; //capacity of dragon class Jon Snow can hold
+	private String[][] world; //2D array representing the grid
+	private int capacityOfDG; //capacity of dragon class Jon Snow can hold
 	
 	//getter method for the grid
 	public String[][] getWorld() {
@@ -13,8 +13,9 @@ public class WesterosWorld {
 		return capacityOfDG;
 	}
 
-	public static String[][] genGrid(){
-		capacityOfDG = (int)(Math.random()*5) +1; //random capacity between 1->5
+	public String[][] genGrid(){
+		
+		this.capacityOfDG = (int)(Math.random()*5) +1; //random capacity between 1->5
 		//int worldRows = (int)(Math.random()*7) +4; //randomly picking rows
 		//int worldCols = (int)(Math.random()*7) +4; //randomly picking cols
 		int worldRows = 4;
@@ -74,18 +75,5 @@ public class WesterosWorld {
 		
 		
 		return world;
-	}
-	public static void main (String[] args){
-		world = genGrid();
-		System.out.println("World Map:\n ");
-		for(int i=0; i<world.length; i++)
-		{
-			for(int j=0; j<world[i].length; j++)
-			{
-				System.out.print(world[i][j] + " ");
-			}
-			System.out.println();
-		}
-		System.out.println("\nCapacity of Dragon Glass: " + capacityOfDG);
 	}
 }
