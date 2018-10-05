@@ -1,9 +1,8 @@
 import java.util.ArrayList;
 
 //A class representing our search tree node with information needed about the path
-public class StateNode implements Comparable{
+public class WesterosNode extends Node implements Comparable {
 	private int whiteWalkersKilled;
-	private int pathCost;
 	private ArrayList <String> path;
 	private boolean[][] visited;
 	private int dragonGlassLeft;
@@ -11,11 +10,10 @@ public class StateNode implements Comparable{
 	private int yPosition;
 	private SearchStrategies strategy;
 	
-	public StateNode(int whiteWalkersKilled, int pathCost, ArrayList<String> path, boolean[][] visited,
+	public WesterosNode(int whiteWalkersKilled, int pathCost, ArrayList<String> path, boolean[][] visited,
 			int dragonGlassLeft, int xPosition, int yPosition, SearchStrategies strategy) {
-		super();
+		super(pathCost);
 		this.whiteWalkersKilled = whiteWalkersKilled;
-		this.pathCost = pathCost;
 		this.path = path;
 		this.visited = visited;
 		this.dragonGlassLeft = dragonGlassLeft;
@@ -29,12 +27,6 @@ public class StateNode implements Comparable{
 	}
 	public void setWhiteWalkersKilled(int whiteWalkersKilled) {
 		this.whiteWalkersKilled = whiteWalkersKilled;
-	}
-	public int getPathCost() {
-		return pathCost;
-	}
-	public void setPathCost(int pathCost) {
-		this.pathCost = pathCost;
 	}
 	public ArrayList<String> getPath() {
 		return path;

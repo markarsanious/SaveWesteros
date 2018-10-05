@@ -2,23 +2,23 @@ import java.util.ArrayList;
 
 public class GenericSearchDS {
 	
-	private ArrayList<StateNode> nodes;
+	private ArrayList<Node> nodes;
 	private SearchStrategies searchStrategy;
 	
 	public GenericSearchDS() {
-		this.nodes = new ArrayList<StateNode>();
+		this.nodes = new ArrayList<Node>();
 	}
 	
-	public GenericSearchDS(ArrayList<StateNode> nodes) {
+	public GenericSearchDS(ArrayList<Node> nodes) {
 		super();
 		this.nodes = nodes;
 	}
 	
-	public void enqueue(StateNode stateNode, SearchStrategies strategy){
+	public void enqueue(SearchStrategies strategy){
 		
 	}
 	
-	public StateNode dequeue()
+	public Node dequeue()
 	{
 		if(!nodes.isEmpty())
 			return nodes.remove(0);
@@ -31,7 +31,7 @@ public class GenericSearchDS {
 		return nodes.size()==0;
 	}
 	
-	public StateNode getFirst(){
+	public Node getFirst(){
 		if(!isEmpty())
 		{
 			return nodes.get(0);
@@ -39,7 +39,7 @@ public class GenericSearchDS {
 		return null;
 	}
 	
-	public StateNode getLast(){
+	public Node getLast(){
 		if(!isEmpty())
 		{
 			return nodes.get(nodes.size()-1);

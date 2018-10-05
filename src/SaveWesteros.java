@@ -5,26 +5,20 @@ public class SaveWesteros extends SearchProblem{
 	private String[][] grid;
 
 	
-	@Override
 	public Solution search(String[][] grid, SearchStrategies strategy, boolean visualization) {
 		// TODO Auto-generated method stub
 		this.grid = grid;
-		boolean[][] visited = new boolean [4][4];
-		StateNode initialState = new StateNode (0, 0, new ArrayList<String>(), visited, 0, 3, 3, strategy);
-		ArrayList<StateNode> currentNodes = new ArrayList<StateNode>();
-		currentNodes.add(initialState);
-		GenericSearchDS currentDS = new GenericSearchDS(currentNodes);
 		Solution solution = null; 
 		switch(strategy)
 		{
-			case BF:  solution = BFS(currentDS); break;
-			case DF:  solution = DFS(currentDS); break;
-			case UC:  solution = UCS(currentDS); break;
-			case ID:  solution = IDS(currentDS); break;
-			case GR1: solution = GR1(currentDS); break;
-			case GR2: solution = GR2(currentDS); break;
-			case AS1: solution = AS1(currentDS); break;
-			case AS2: solution = AS2(currentDS); break;
+			case BF:  solution = BFS(); break;
+			case DF:  solution = DFS(); break;
+			case UC:  solution = UCS(); break;
+			case ID:  solution = IDS(); break;
+			case GR1: solution = GR1(); break;
+			case GR2: solution = GR2(); break;
+			case AS1: solution = AS1(); break;
+			case AS2: solution = AS2(); break;
 			default: break;
 		}
 		
@@ -34,72 +28,127 @@ public class SaveWesteros extends SearchProblem{
 	
 
 	@Override
-	public Solution BFS(GenericSearchDS currentNodes) {
+	public Solution BFS() {
 		// TODO Auto-generated method stub
-		if(currentNodes.isEmpty())
-			return null;
-		StateNode firstNode = currentNodes.dequeue();
 		
-		if(firstNode!=null)
-		{	
-			// searching for the dragon stone
-			if(firstNode.getDragonGlassLeft()==0)
-			{
-				int currentRow = firstNode.getxPosition();
-				int currentCol = firstNode.getyPosition();
-				if (grid[currentRow][currentCol]=="D")
-				{
-					
-				}
-			}// searching for a white walker
-			else
-			{
-				
-			}
+		return genericSearch(SearchStrategies.BF);
+	}
+
+	@Override
+	public Solution DFS() {
+		// TODO Auto-generated method stub
+		return genericSearch(SearchStrategies.DF);
+	}
+
+	@Override
+	public Solution UCS() {
+		// TODO Auto-generated method stub
+		return genericSearch(SearchStrategies.UC);
+	}
+
+	@Override
+	public Solution IDS() {
+		// TODO Auto-generated method stub
+		return genericSearch(SearchStrategies.ID);
+	}
+
+	@Override
+	public Solution GR1() {
+		// TODO Auto-generated method stub
+		return genericSearch(SearchStrategies.GR1);
+	}
+
+	@Override
+	public Solution GR2() {
+		// TODO Auto-generated method stub
+		return genericSearch(SearchStrategies.GR2);
+	}
+
+	@Override
+	public Solution AS1() {
+		// TODO Auto-generated method stub
+		return genericSearch(SearchStrategies.AS1);
+	}
+
+	@Override
+	public Solution AS2() {
+		// TODO Auto-generated method stub
+		return genericSearch(SearchStrategies.AS2);
+	}
+
+
+	@Override
+	Solution genericSearch(SearchStrategies strategy) {
+		// TODO Auto-generated method stub
+		boolean[][] visited = new boolean [4][4];
+		Node initialState = new WesterosNode (0, 0, new ArrayList<String>(), visited, 0, 3, 3, strategy);
+		GenericSearchDS currentDS = makeQ(initialState);
+		
+		/*
+		 * STEPS TO BE IMPLEMENTED inside the following loop:
+		 * 1- check if empty return null
+		 * 2- dequeue
+		 * 3- do the goal test on the dequeued node
+		 * 4- expand current Node
+		 * 5- enqueue its children (return of the expand) one by on.  
+		 */
+		
+		while(true)
+		{
+			if(currentDS.isEmpty())
+				return null;
+			
+			Node firstNode = currentDS.dequeue();
+			/*
+			 * Steps missing:
+			 * 1- Goal Test
+			 * 2- expand current Node
+			 * 3- Enqueue
+			 */
 		}
-		return null;
+		
+		
+//		if(firstNode!=null)
+//		{	
+//			// searching for the dragon stone
+//			if(((WesterosNode)firstNode).getDragonGlassLeft()==0)
+//			{
+//				int currentRow = ((WesterosNode)firstNode).getxPosition();
+//				int currentCol = ((WesterosNode)firstNode).getyPosition();
+//				if (grid[currentRow][currentCol]=="D")
+//				{
+//					
+//				}
+//			}// searching for a white walker
+//			else
+//			{
+//				
+//			}
+//		}
 	}
 
+
+
 	@Override
-	public Solution DFS(GenericSearchDS currentNodes) {
+	ArrayList<Node> expand(Node node) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public Solution UCS(GenericSearchDS currentNodes) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
-	public Solution IDS(GenericSearchDS currentNodes) {
-		// TODO Auto-generated method stub
-		return null;
+	GenericSearchDS makeQ(Node node) {
+		ArrayList<Node> currentNodes = new ArrayList<Node>();
+		currentNodes.add(node);
+		return new GenericSearchDS(currentNodes);
 	}
 
-	@Override
-	public Solution GR1(GenericSearchDS currentNodes) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	@Override
-	public Solution GR2(GenericSearchDS currentNodes) {
+	boolean goalTest(Node node) {
 		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Solution AS1(GenericSearchDS currentNodes) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Solution AS2(GenericSearchDS currentNodes) {
-		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 	
 	
