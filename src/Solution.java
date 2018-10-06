@@ -15,7 +15,7 @@ public class Solution {
 	}
 	
 	public String toString() {
-		String statement = "";
+		String statement = "Found Solution:\n";
 		statement += "Path: \n";
 		statement += this.path.toString();
 		return statement;

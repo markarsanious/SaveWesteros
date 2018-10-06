@@ -20,6 +20,19 @@ public class GenericSearchDS {
 	
 	public void enqueue(SearchStrategies strategy, ArrayList<Node> nodes) {
 		// according to strategy, enqueue will behave differently (insert at first/last for example)
+		for(Node node: nodes) {
+			switch(strategy) {
+				case DF: this.nodes.add(node); break;
+				case BF: this.nodes.add(node); break;
+				case UC: this.nodes.add(node); break;
+				case ID: this.nodes.add(node); break;
+				case GR1: this.nodes.add(node); break;
+				case GR2: this.nodes.add(node); break;
+				case AS1: this.nodes.add(node); break;
+				case AS2: this.nodes.add(node); break;
+			}
+			
+		}
 		
 	}
 	
@@ -52,7 +65,9 @@ public class GenericSearchDS {
 		return null;
 	}
 
-	
+	public int size() {
+		return nodes.size();
+	}
 	
 	 
 }
