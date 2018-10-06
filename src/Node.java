@@ -16,4 +16,8 @@ public class Node {
 		this.cost = cost;
 	}
 	
+	public String toString() {
+		return "Cost: " + this.getCost();
+	}
+	
 }

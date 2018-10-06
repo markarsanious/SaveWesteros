@@ -19,7 +19,11 @@ public class WesterosNode extends Node implements Comparable {
 		this.dragonGlassLeft = dragonGlassLeft;
 		this.xPosition = xPosition;
 		this.yPosition = yPosition;
-		this.strategy = strategy;
+		this.setStrategy(strategy);
+	}
+	
+	public String toString() {
+		return "{Cost: " + this.getCost() + ", X: " + this.getxPosition() + ", Y: " + this.getyPosition() + "}";
 	}
 	
 	public int getWhiteWalkersKilled() {
@@ -63,6 +67,14 @@ public class WesterosNode extends Node implements Comparable {
 	public int compareTo(Object o) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public SearchStrategies getStrategy() {
+		return strategy;
+	}
+
+	public void setStrategy(SearchStrategies strategy) {
+		this.strategy = strategy;
 	}	
 	
 	

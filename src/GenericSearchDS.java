@@ -14,7 +14,12 @@ public class GenericSearchDS {
 		this.nodes = nodes;
 	}
 	
-	public void enqueue(SearchStrategies strategy){
+	public String toString() {
+		return this.nodes.toString();
+	}
+	
+	public void enqueue(SearchStrategies strategy, ArrayList<Node> nodes) {
+		// according to strategy, enqueue will behave differently (insert at first/last for example)
 		
 	}
 	

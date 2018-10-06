@@ -13,6 +13,14 @@ public class Solution {
 		this.cost = cost;
 		this.nodesExpanded = nodesExpanded;
 	}
+	
+	public String toString() {
+		String statement = "";
+		statement += "Path: \n";
+		statement += this.path.toString();
+		return statement;
+		
+	}
 	public ArrayList<String> getPath() {
 		return path;
 	}
