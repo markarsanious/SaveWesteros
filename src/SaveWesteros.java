@@ -2,7 +2,16 @@ import java.util.ArrayList;
 
 //subclass of SearchProblem
 public class SaveWesteros extends SearchProblem{
+	// duplicate attribute in WestrosWorld!
 	private String[][] grid;
+	private WesterosWorld world;
+	private ArrayList<WesterosNode> sequenceofExpansion;
+	// better add reference to your world
+	// constructor
+	public SaveWesteros(WesterosWorld world) {
+		this.world = world;
+		this.sequenceofExpansion = new ArrayList<>();
+	}
 
 	
 	public Solution search(String[][] grid, SearchStrategies strategy, boolean visualization) {
@@ -80,10 +89,9 @@ public class SaveWesteros extends SearchProblem{
 	@Override
 	Solution genericSearch(SearchStrategies strategy) {
 		// TODO Auto-generated method stub
-		boolean[][] visited = new boolean [4][4];
+		boolean[][] visited = new boolean [this.grid.length][this.grid[0].length];
 		Node initialState = new WesterosNode (0, 0, new ArrayList<String>(), visited, 0, 3, 3, strategy);
 		GenericSearchDS currentDS = makeQ(initialState);
-		
 		/*
 		 * STEPS TO BE IMPLEMENTED inside the following loop:
 		 * 1- check if empty return null
@@ -95,10 +103,21 @@ public class SaveWesteros extends SearchProblem{
 		
 		while(true)
 		{
+			System.out.println(currentDS.size());
 			if(currentDS.isEmpty())
 				return null;
 			
 			Node firstNode = currentDS.dequeue();
+			WesterosNode castedNode = (WesterosNode) firstNode;
+			this.sequenceofExpansion.add(castedNode);
+			
+			if(goalTest(firstNode)) {
+				// return Node or solution?
+				return new Solution(castedNode.getPath(), castedNode.getCost(), this.sequenceofExpansion.size());
+			} else {
+				ArrayList<Node> nodes = this.expand(firstNode);
+				currentDS.enqueue(strategy, nodes);
+			}
 			/*
 			 * Steps missing:
 			 * 1- Goal Test
@@ -107,32 +126,111 @@ public class SaveWesteros extends SearchProblem{
 			 */
 		}
 		
-		
-//		if(firstNode!=null)
-//		{	
-//			// searching for the dragon stone
-//			if(((WesterosNode)firstNode).getDragonGlassLeft()==0)
-//			{
-//				int currentRow = ((WesterosNode)firstNode).getxPosition();
-//				int currentCol = ((WesterosNode)firstNode).getyPosition();
-//				if (grid[currentRow][currentCol]=="D")
-//				{
-//					
-//				}
-//			}// searching for a white walker
-//			else
-//			{
-//				
-//			}
-//		}
+
 	}
 
 
 
 	@Override
 	ArrayList<Node> expand(Node node) {
-		// TODO Auto-generated method stub
-		return null;
+		// Initialise return value
+		ArrayList<Node> nodes = new ArrayList<Node>();
+		
+		WesterosNode castedNode = (WesterosNode) node;
+		
+		// get current state attributes
+		int xPosition = castedNode.getxPosition();
+		int yPosition = castedNode.getyPosition();
+		int whiteWalkersKilled = castedNode.getWhiteWalkersKilled();
+		int remainingKnives = castedNode.getDragonGlassLeft();
+		ArrayList<String> path = castedNode.getPath();
+		int pathCost = castedNode.getCost(); // where to get the real cost?
+		
+		String currentCell = this.world.getWorld()[xPosition][yPosition];
+		if(currentCell == "O") {
+			// obstacle, do nothing
+			return nodes;
+		} else {
+			if(currentCell == "D") {
+				// dragon stone, get knives.
+				// TODO: Anything else?
+				remainingKnives += this.world.getCapacityOfDG();
+				
+			}
+		}
+		int surroundingWalkers = this.getTotalSurroundingWalkers(xPosition, yPosition);
+		
+		
+		// update current state
+		boolean[][] oldVisited = castedNode.getVisited();
+		boolean[][] updatedVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
+		
+		if(surroundingWalkers > 0) {
+			whiteWalkersKilled += surroundingWalkers;
+			// TODO: what if knives is zero?
+			remainingKnives -= 1;
+			// cost is increased by 1 when using a knive
+			pathCost ++;
+		}
+		
+		// cloning visited array by value not reference; O(n*m)
+		// TODO: enhance this?
+		for(int i=0; i<oldVisited.length; i++)
+			  for(int j=0; j<oldVisited[i].length; j++)
+				  updatedVisited[i][j] = oldVisited[i][j];
+		
+		// updated visited grid
+		updatedVisited[xPosition][yPosition] = true;
+
+		
+		// cases: 4 corners, 4 sides, in-between
+		
+		if(xPosition > 0) {
+			// at least second row, we have UP
+			ArrayList<String> upPath = new ArrayList<String>(path);
+			upPath.add("U");
+			// Visit only none visited cells
+			if(oldVisited[xPosition - 1][yPosition] == false) {
+				Node upNode = new WesterosNode(whiteWalkersKilled, pathCost, upPath, updatedVisited,
+						remainingKnives, xPosition - 1, yPosition, castedNode.getStrategy());
+				nodes.add(upNode);				
+			}
+		}
+		
+		if(xPosition < (this.world.getWorldRows() - 1)) {
+			// at least second row, we have Down
+			ArrayList<String> downPath = new ArrayList<String>(path);
+			downPath.add("D");
+			if(oldVisited[xPosition + 1][yPosition] == false) {
+				Node downNode = new WesterosNode(whiteWalkersKilled, pathCost, downPath, updatedVisited,
+						remainingKnives, xPosition + 1, yPosition, castedNode.getStrategy());
+				nodes.add(downNode);
+			}
+		}
+		
+		if(yPosition > 0) {
+			// at least second row, we have Left
+			ArrayList<String> leftPath = new ArrayList<String>(path);
+			leftPath.add("L");
+			if(oldVisited[xPosition][yPosition - 1] == false) {
+				Node leftNode = new WesterosNode(whiteWalkersKilled, pathCost, leftPath, updatedVisited,
+						remainingKnives, xPosition, yPosition - 1, castedNode.getStrategy());
+				nodes.add(leftNode);			
+			}
+		}
+		
+		if(yPosition < (this.world.getWorldCols() - 1)) {
+			// at least second row, we have Right
+			ArrayList<String> rightPath = new ArrayList<String>(path);
+			rightPath.add("R");
+			if(oldVisited[xPosition][yPosition + 1] == false) {
+				Node downNode = new WesterosNode(whiteWalkersKilled, pathCost, rightPath, updatedVisited,
+						remainingKnives, xPosition, yPosition + 1, castedNode.getStrategy());
+				nodes.add(downNode);
+			}
+		}
+		
+		return nodes;
 	}
 
 
@@ -142,12 +240,36 @@ public class SaveWesteros extends SearchProblem{
 		currentNodes.add(node);
 		return new GenericSearchDS(currentNodes);
 	}
+	
+	private int getTotalSurroundingWalkers(int xPosition, int yPosition) {
+		int total = 0;
+		String[][] grid = this.world.getWorld();
+		if(xPosition > 0) {
+			total += grid[xPosition - 1][yPosition] == "W" ? 1 : 0;
+		}
+		if(xPosition < (this.world.getWorldRows() - 1)) {
+			total += grid[xPosition + 1][yPosition] == "W" ? 1 : 0;
+		}
+		if(yPosition > 0) {
+			total += grid[xPosition][yPosition - 1] == "W" ? 1 : 0;
+		}
+		if(yPosition < (this.world.getWorldCols() -1)) {
+			total += grid[xPosition][yPosition + 1] == "W" ? 1 : 0;
+		}
+		
+		return total;
+	}
 
 
 
 	@Override
 	boolean goalTest(Node node) {
-		// TODO Auto-generated method stub
+		// check if zero white walkers => done
+		// else, check for dragon stones
+		WesterosNode castedNode = (WesterosNode)node;
+		if(castedNode.getWhiteWalkersKilled() == this.world.getWhiteWalkersCapacity()) {
+			// reached goal state
+		}
 		return false;
 	}
 	
