@@ -9,9 +9,10 @@ public class WesterosNode extends Node implements Comparable {
 	private int xPosition;
 	private int yPosition;
 	private SearchStrategies strategy;
+	private String[][] grid;
 	
 	public WesterosNode(int whiteWalkersKilled, int pathCost, ArrayList<String> path, boolean[][] visited,
-			int dragonGlassLeft, int xPosition, int yPosition, SearchStrategies strategy) {
+			int dragonGlassLeft, int xPosition, int yPosition, SearchStrategies strategy, String[][] grid) {
 		super(pathCost);
 		this.whiteWalkersKilled = whiteWalkersKilled;
 		this.path = path;
@@ -20,8 +21,10 @@ public class WesterosNode extends Node implements Comparable {
 		this.xPosition = xPosition;
 		this.yPosition = yPosition;
 		this.setStrategy(strategy);
+		this.grid = grid;
 	}
 	
+
 	public String toString() {
 		return "{Cost: " + this.getCost() + ", X: " + this.getxPosition() + ", Y: " + this.getyPosition() + "}";
 	}
@@ -76,6 +79,14 @@ public class WesterosNode extends Node implements Comparable {
 	public void setStrategy(SearchStrategies strategy) {
 		this.strategy = strategy;
 	}	
+	
+	public String[][] getGrid() {
+		return grid;
+	}
+
+	public void setGrid(String[][] grid) {
+		this.grid = grid;
+	}
 	
 	
 	

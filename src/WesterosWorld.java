@@ -43,9 +43,10 @@ public class WesterosWorld {
 		this.capacityOfDG = (int)(Math.random()*5) +1; //random capacity between 1->5
 		//int worldRows = (int)(Math.random()*7) +4; //randomly picking rows
 		//int worldCols = (int)(Math.random()*7) +4; //randomly picking cols
-		this.worldRows = x;
-		this.worldCols = y;
+		this.worldRows = y;
+		this.worldCols = x;
 		this.whiteWalkersCapacity = (int)(Math.random()*((worldRows*worldCols)/2))+1; //randomly picking ww capcity up to 1/2 the world
+		//this.whiteWalkersCapacity = 1;
 		int obstaclesCapacity = (int)(Math.random()*((worldRows*worldCols)/8))+1; //randomly picking obstacles capcity up to 1/8 the world
 		
 		//generate empty world with Jon Snow

@@ -18,7 +18,7 @@ public class Main {
 		System.out.println("\nCapacity of Dragon Glass: " + world.getCapacityOfDG());
 		Solution solution = westeros.search(grid, SearchStrategies.BF, false);
 		if(solution != null) {
-			System.out.println(solution);			
+			System.out.println(solution.toString());	
 		} else {
 			System.out.println("No solution was found.");
 		}

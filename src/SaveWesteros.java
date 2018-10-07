@@ -90,7 +90,7 @@ public class SaveWesteros extends SearchProblem{
 	Solution genericSearch(SearchStrategies strategy) {
 		// TODO Auto-generated method stub
 		boolean[][] visited = new boolean [this.grid.length][this.grid[0].length];
-		Node initialState = new WesterosNode (0, 0, new ArrayList<String>(), visited, 0, 3, 3, strategy);
+		Node initialState = new WesterosNode (0, 0, new ArrayList<String>(), visited, 0, 3, 3, strategy, this.grid);
 		GenericSearchDS currentDS = makeQ(initialState);
 		/*
 		 * STEPS TO BE IMPLEMENTED inside the following loop:
@@ -103,16 +103,14 @@ public class SaveWesteros extends SearchProblem{
 		
 		while(true)
 		{
-			System.out.println(currentDS.size());
 			if(currentDS.isEmpty())
 				return null;
 			
 			Node firstNode = currentDS.dequeue();
 			WesterosNode castedNode = (WesterosNode) firstNode;
-			this.sequenceofExpansion.add(castedNode);
 			
 			if(goalTest(firstNode)) {
-				// return Node or solution?
+				
 				return new Solution(castedNode.getPath(), castedNode.getCost(), this.sequenceofExpansion.size());
 			} else {
 				ArrayList<Node> nodes = this.expand(firstNode);
@@ -134,103 +132,92 @@ public class SaveWesteros extends SearchProblem{
 	@Override
 	ArrayList<Node> expand(Node node) {
 		// Initialise return value
-		ArrayList<Node> nodes = new ArrayList<Node>();
-		
-		WesterosNode castedNode = (WesterosNode) node;
-		
+		ArrayList<Node> expandedNodes = new ArrayList<Node>();		
+
+		WesterosNode castedNode = (WesterosNode)(node);
+		this.sequenceofExpansion.add(castedNode);
+
 		// get current state attributes
+		int whiteWalkersKilled = castedNode.getWhiteWalkersKilled();
+		ArrayList<String> path = castedNode.getPath();
+		boolean[][] oldVisited = castedNode.getVisited();
+		int remainingDragonGlasses = castedNode.getDragonGlassLeft();
 		int xPosition = castedNode.getxPosition();
 		int yPosition = castedNode.getyPosition();
-		int whiteWalkersKilled = castedNode.getWhiteWalkersKilled();
-		int remainingKnives = castedNode.getDragonGlassLeft();
-		ArrayList<String> path = castedNode.getPath();
+		SearchStrategies strategy = castedNode.getStrategy();
 		int pathCost = castedNode.getCost(); // where to get the real cost?
+		String[][] nodeGrid = castedNode.getGrid();
 		
-		String currentCell = this.world.getWorld()[xPosition][yPosition];
-		if(currentCell == "O") {
-			// obstacle, do nothing
-			return nodes;
-		} else {
-			if(currentCell == "D") {
-				// dragon stone, get knives.
-				// TODO: Anything else?
-				remainingKnives += this.world.getCapacityOfDG();
-				
-			}
-		}
-		int surroundingWalkers = this.getTotalSurroundingWalkers(xPosition, yPosition);
-		
-		
-		// update current state
-		boolean[][] oldVisited = castedNode.getVisited();
-		boolean[][] updatedVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
-		
-		if(surroundingWalkers > 0) {
-			whiteWalkersKilled += surroundingWalkers;
-			// TODO: what if knives is zero?
-			remainingKnives -= 1;
-			// cost is increased by 1 when using a knive
-			pathCost ++;
-		}
-		
-		// cloning visited array by value not reference; O(n*m)
-		// TODO: enhance this?
-		for(int i=0; i<oldVisited.length; i++)
-			  for(int j=0; j<oldVisited[i].length; j++)
-				  updatedVisited[i][j] = oldVisited[i][j];
-		
-		// updated visited grid
-		updatedVisited[xPosition][yPosition] = true;
+		String currentCell = this.world.getWorld()[yPosition][xPosition];
 
+		// update the current cell as visited
+		oldVisited[xPosition][yPosition] = true;
 		
-		// cases: 4 corners, 4 sides, in-between
 		
-		if(xPosition > 0) {
-			// at least second row, we have UP
-			ArrayList<String> upPath = new ArrayList<String>(path);
-			upPath.add("U");
-			// Visit only none visited cells
-			if(oldVisited[xPosition - 1][yPosition] == false) {
-				Node upNode = new WesterosNode(whiteWalkersKilled, pathCost, upPath, updatedVisited,
-						remainingKnives, xPosition - 1, yPosition, castedNode.getStrategy());
-				nodes.add(upNode);				
+		// if no dragon glasses left, look for dragonstone
+		// otherwise look for white walkers
+		
+		if(remainingDragonGlasses == 0)
+		{
+			// if dragonstone found, recharge
+			if(currentCell == "D")
+			{
+				remainingDragonGlasses += this.world.getCapacityOfDG();
 			}
+			
+			return this.getNeighbouringCells(whiteWalkersKilled, path, oldVisited, remainingDragonGlasses, xPosition, yPosition, strategy, pathCost, nodeGrid);
+		}
+		else
+		{
+			
+			int totalSurroundingWhiteWalkers = 0;
+			
+			String[][] newNodeGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
+			for(int i=0; i<nodeGrid.length; i++)
+				  for(int j=0; j<nodeGrid[i].length; j++)
+					  newNodeGrid[i][j] = nodeGrid[i][j];
+			
+			if(xPosition > 0) {
+				totalSurroundingWhiteWalkers += nodeGrid[yPosition][xPosition - 1] == "W" ? 1 : 0;
+				newNodeGrid[yPosition][xPosition-1]= "E";
+			}
+			if(xPosition < (this.world.getWorldCols() - 1)) {
+				totalSurroundingWhiteWalkers += nodeGrid[yPosition][xPosition + 1] == "W" ? 1 : 0;
+				newNodeGrid[yPosition][xPosition+1]= "E";
+			}
+			if(yPosition > 0) {
+				totalSurroundingWhiteWalkers += nodeGrid[yPosition - 1][xPosition] == "W" ? 1 : 0;
+				newNodeGrid[yPosition-1][xPosition]= "E";
+			}
+			if(yPosition < (this.world.getWorldRows() -1)) {
+				totalSurroundingWhiteWalkers += nodeGrid[yPosition + 1][xPosition] == "W" ? 1 : 0;
+				newNodeGrid[yPosition+1][xPosition]= "E";
+			}
+			
+			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
+			for(int i=0; i<oldVisited.length; i++)
+				  for(int j=0; j<oldVisited[i].length; j++)
+					  newVisited[i][j] = oldVisited[i][j];
+			
+			
+			if(totalSurroundingWhiteWalkers > 0) {
+				whiteWalkersKilled += totalSurroundingWhiteWalkers;
+				// TODO: what if knives is zero?
+				remainingDragonGlasses -= 1;
+				// cost is increased by 10 when using a dragon glass
+				pathCost+=10;
+				
+				if(remainingDragonGlasses==0)
+				{
+					for(int i=0; i<newVisited.length; i++)
+						  for(int j=0; j<newVisited[i].length; j++)
+							  newVisited[i][j] = false;
+				}
+			}
+			
+			return this.getNeighbouringCells(whiteWalkersKilled, path, newVisited, remainingDragonGlasses, xPosition, yPosition, strategy, pathCost, newNodeGrid);
 		}
 		
-		if(xPosition < (this.world.getWorldRows() - 1)) {
-			// at least second row, we have Down
-			ArrayList<String> downPath = new ArrayList<String>(path);
-			downPath.add("D");
-			if(oldVisited[xPosition + 1][yPosition] == false) {
-				Node downNode = new WesterosNode(whiteWalkersKilled, pathCost, downPath, updatedVisited,
-						remainingKnives, xPosition + 1, yPosition, castedNode.getStrategy());
-				nodes.add(downNode);
-			}
-		}
-		
-		if(yPosition > 0) {
-			// at least second row, we have Left
-			ArrayList<String> leftPath = new ArrayList<String>(path);
-			leftPath.add("L");
-			if(oldVisited[xPosition][yPosition - 1] == false) {
-				Node leftNode = new WesterosNode(whiteWalkersKilled, pathCost, leftPath, updatedVisited,
-						remainingKnives, xPosition, yPosition - 1, castedNode.getStrategy());
-				nodes.add(leftNode);			
-			}
-		}
-		
-		if(yPosition < (this.world.getWorldCols() - 1)) {
-			// at least second row, we have Right
-			ArrayList<String> rightPath = new ArrayList<String>(path);
-			rightPath.add("R");
-			if(oldVisited[xPosition][yPosition + 1] == false) {
-				Node downNode = new WesterosNode(whiteWalkersKilled, pathCost, rightPath, updatedVisited,
-						remainingKnives, xPosition, yPosition + 1, castedNode.getStrategy());
-				nodes.add(downNode);
-			}
-		}
-		
-		return nodes;
 	}
 
 
@@ -240,26 +227,6 @@ public class SaveWesteros extends SearchProblem{
 		currentNodes.add(node);
 		return new GenericSearchDS(currentNodes);
 	}
-	
-	private int getTotalSurroundingWalkers(int xPosition, int yPosition) {
-		int total = 0;
-		String[][] grid = this.world.getWorld();
-		if(xPosition > 0) {
-			total += grid[xPosition - 1][yPosition] == "W" ? 1 : 0;
-		}
-		if(xPosition < (this.world.getWorldRows() - 1)) {
-			total += grid[xPosition + 1][yPosition] == "W" ? 1 : 0;
-		}
-		if(yPosition > 0) {
-			total += grid[xPosition][yPosition - 1] == "W" ? 1 : 0;
-		}
-		if(yPosition < (this.world.getWorldCols() -1)) {
-			total += grid[xPosition][yPosition + 1] == "W" ? 1 : 0;
-		}
-		
-		return total;
-	}
-
 
 
 	@Override
@@ -268,10 +235,118 @@ public class SaveWesteros extends SearchProblem{
 		// else, check for dragon stones
 		WesterosNode castedNode = (WesterosNode)node;
 		if(castedNode.getWhiteWalkersKilled() == this.world.getWhiteWalkersCapacity()) {
-			// reached goal state
+			return true;
 		}
 		return false;
 	}
 	
+	
+	private ArrayList<Node> getNeighbouringCells(int whiteWalkersKilled, ArrayList<String> path, boolean[][] visited,
+			int dragonGlassesLeft, int xPosition, int yPosition, SearchStrategies strategy, int pathCost, String[][] grid)
+	{
+		ArrayList<Node> returnedNodes = new ArrayList<Node>();
+		
+		if(xPosition > 0 && !visited[yPosition][xPosition-1] && !grid[yPosition][xPosition-1].equals("W") && !grid[yPosition][xPosition-1].equals("O"))
+		{
+			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
+			// cloning visited array by value not reference; O(n*m)
+			// TODO: enhance this?
+			for(int i=0; i<visited.length; i++)
+				  for(int j=0; j<visited[i].length; j++)
+					  newVisited[i][j] = visited[i][j];
+			
+			String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
+			for(int i=0; i<grid.length; i++)
+				  for(int j=0; j<grid[i].length; j++)
+					  newGrid[i][j] = grid[i][j];
+			
+			ArrayList<String> newPath = new ArrayList<String>();
+			while(!path.isEmpty())
+			{
+				newPath.add(path.remove(0));
+			}
+			
+			newPath.add("LEFT");
+			
+			Node leftNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft, xPosition-1, yPosition, strategy, newGrid);
+			returnedNodes.add(leftNode);
+		}
+		
+		if(xPosition < world.getWorldCols()-1 && !visited[yPosition][xPosition+1] && !grid[yPosition][xPosition+1].equals("W") && !grid[yPosition][xPosition+1].equals("O"))
+		{
+			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
+			for(int i=0; i<visited.length; i++)
+				  for(int j=0; j<visited[i].length; j++)
+					  newVisited[i][j] = visited[i][j];
+			
+			String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
+			for(int i=0; i<grid.length; i++)
+				  for(int j=0; j<grid[i].length; j++)
+					  newGrid[i][j] = grid[i][j];
+			
+			ArrayList<String> newPath = new ArrayList<String>();
+			while(!path.isEmpty())
+			{
+				newPath.add(path.remove(0));
+			}
+			
+			newPath.add("RIGHT");
+			
+			Node rightNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft, xPosition+1, yPosition, strategy, newGrid);
+			returnedNodes.add(rightNode);
+			
+		}
+		
+		if(yPosition > 0 && !visited[yPosition-1][xPosition] && !grid[yPosition-1][xPosition].equals("W") && !grid[yPosition-1][xPosition].equals("O"))
+		{
+			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
+			for(int i=0; i<visited.length; i++)
+				  for(int j=0; j<visited[i].length; j++)
+					  newVisited[i][j] = visited[i][j];
+			
+			String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
+			for(int i=0; i<grid.length; i++)
+				  for(int j=0; j<grid[i].length; j++)
+					  newGrid[i][j] = grid[i][j];
+			
+			ArrayList<String> newPath = new ArrayList<String>();
+			while(!path.isEmpty())
+			{
+				newPath.add(path.remove(0));
+			}
+			
+			newPath.add("UP");
+			
+			Node upNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft, xPosition, yPosition-1, strategy, newGrid);
+			returnedNodes.add(upNode);
+		}
+		
+		if(yPosition < world.getWorldRows()-1 && !visited[yPosition+1][xPosition] && !grid[yPosition+1][xPosition].equals("W") && !grid[yPosition+1][xPosition].equals("O"))
+		{
+			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
+			for(int i=0; i<visited.length; i++)
+				  for(int j=0; j<visited[i].length; j++)
+					  newVisited[i][j] = visited[i][j];
+			
+			String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
+			for(int i=0; i<grid.length; i++)
+				  for(int j=0; j<grid[i].length; j++)
+					  newGrid[i][j] = grid[i][j];
+			
+			ArrayList<String> newPath = new ArrayList<String>();
+			while(!path.isEmpty())
+			{
+				newPath.add(path.remove(0));
+			}
+			
+			newPath.add("DOWN");
+			
+			Node downNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft, xPosition, yPosition+1, strategy, newGrid);
+			returnedNodes.add(downNode);
+		}
+		
+		
+		return returnedNodes;
+	}
 	
 }
