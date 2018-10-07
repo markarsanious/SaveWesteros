@@ -163,6 +163,7 @@ public class SaveWesteros extends SearchProblem{
 			if(currentCell == "D")
 			{
 				remainingDragonGlasses = this.world.getCapacityOfDG();
+				path.add("Recharged dragonglass");
 			}
 			
 			return this.getNeighbouringCells(whiteWalkersKilled, path, oldVisited, remainingDragonGlasses, xPosition, yPosition, strategy, pathCost, nodeGrid);
@@ -213,6 +214,8 @@ public class SaveWesteros extends SearchProblem{
 				// cost is increased by 10 when using a dragon glass
 				pathCost+=10;
 				
+				path.add("Killed " + totalSurroundingWhiteWalkers);
+				
 				
 				// no dragonglass found, reset visited array and new goal is dragonstone
 				if(remainingDragonGlasses==0)
@@ -221,6 +224,11 @@ public class SaveWesteros extends SearchProblem{
 						  for(int j=0; j<newVisited[i].length; j++)
 							  newVisited[i][j] = false;
 				}
+			}
+			
+			// do not expand if goal is reached
+			if(goalTest(node)) {
+				return expandedNodes;
 			}
 			
 			return this.getNeighbouringCells(whiteWalkersKilled, path, newVisited, remainingDragonGlasses, xPosition, yPosition, strategy, pathCost, newNodeGrid);
