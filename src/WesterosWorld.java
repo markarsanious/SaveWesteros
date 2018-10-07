@@ -99,6 +99,9 @@ public class WesterosWorld {
 			}
 		}
 		
+		// infinite loop case
+		world = new String [][]{{"E", "E", "O", "W"}, {"W", "W", "E", "E"}, {"W", "D", "E", "E"}, {"E", "W", "W", "J"}};
+		
 		
 		return world;
 	}

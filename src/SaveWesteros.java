@@ -108,6 +108,7 @@ public class SaveWesteros extends SearchProblem{
 			
 			Node firstNode = currentDS.dequeue();
 			WesterosNode castedNode = (WesterosNode) firstNode;
+//			System.out.println(castedNode);
 			
 			if(goalTest(firstNode)) {
 				
@@ -164,6 +165,8 @@ public class SaveWesteros extends SearchProblem{
 			{
 				remainingDragonGlasses = this.world.getCapacityOfDG();
 				path.add("Recharged dragonglass");
+				oldVisited = new boolean[world.getWorldRows()][world.getWorldCols()];
+				
 			}
 			
 			return this.getNeighbouringCells(whiteWalkersKilled, path, oldVisited, remainingDragonGlasses, xPosition, yPosition, strategy, pathCost, nodeGrid);
@@ -226,6 +229,7 @@ public class SaveWesteros extends SearchProblem{
 				}
 			}
 			
+			// TODO: Workaround, will need to change this
 			// do not expand if goal is reached
 			if(goalTest(node)) {
 				return expandedNodes;
