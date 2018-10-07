@@ -162,21 +162,24 @@ public class SaveWesteros extends SearchProblem{
 			// if dragonstone found, recharge
 			if(currentCell == "D")
 			{
-				remainingDragonGlasses += this.world.getCapacityOfDG();
+				remainingDragonGlasses = this.world.getCapacityOfDG();
 			}
 			
 			return this.getNeighbouringCells(whiteWalkersKilled, path, oldVisited, remainingDragonGlasses, xPosition, yPosition, strategy, pathCost, nodeGrid);
 		}
+		// sufficient dragonglass, look for white walkers
 		else
 		{
 			
 			int totalSurroundingWhiteWalkers = 0;
 			
+			// copy the the old grid
 			String[][] newNodeGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
 			for(int i=0; i<nodeGrid.length; i++)
 				  for(int j=0; j<nodeGrid[i].length; j++)
 					  newNodeGrid[i][j] = nodeGrid[i][j];
 			
+			// check 4 neighboring cells and kill white walkers if found
 			if(xPosition > 0) {
 				totalSurroundingWhiteWalkers += nodeGrid[yPosition][xPosition - 1] == "W" ? 1 : 0;
 				newNodeGrid[yPosition][xPosition-1]= "E";
@@ -194,6 +197,9 @@ public class SaveWesteros extends SearchProblem{
 				newNodeGrid[yPosition+1][xPosition]= "E";
 			}
 			
+			//System.out.println("Killed: " + totalSurroundingWhiteWalkers);
+			
+			// copy old visited array
 			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
 			for(int i=0; i<oldVisited.length; i++)
 				  for(int j=0; j<oldVisited[i].length; j++)
@@ -207,6 +213,8 @@ public class SaveWesteros extends SearchProblem{
 				// cost is increased by 10 when using a dragon glass
 				pathCost+=10;
 				
+				
+				// no dragonglass found, reset visited array and new goal is dragonstone
 				if(remainingDragonGlasses==0)
 				{
 					for(int i=0; i<newVisited.length; i++)
@@ -246,6 +254,8 @@ public class SaveWesteros extends SearchProblem{
 	{
 		ArrayList<Node> returnedNodes = new ArrayList<Node>();
 		
+		
+		// check left
 		if(xPosition > 0 && !visited[yPosition][xPosition-1] && !grid[yPosition][xPosition-1].equals("W") && !grid[yPosition][xPosition-1].equals("O"))
 		{
 			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
@@ -261,17 +271,20 @@ public class SaveWesteros extends SearchProblem{
 					  newGrid[i][j] = grid[i][j];
 			
 			ArrayList<String> newPath = new ArrayList<String>();
-			while(!path.isEmpty())
-			{
-				newPath.add(path.remove(0));
-			}
+//			while(!path.isEmpty())
+//			{
+//				newPath.add(path.remove(0));
+//			}
+			for(String currentDirection: path)
+				newPath.add(currentDirection);
 			
-			newPath.add("LEFT");
+			newPath.add("LEFT from " + xPosition + " " + yPosition);
 			
 			Node leftNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft, xPosition-1, yPosition, strategy, newGrid);
 			returnedNodes.add(leftNode);
 		}
 		
+		// check right
 		if(xPosition < world.getWorldCols()-1 && !visited[yPosition][xPosition+1] && !grid[yPosition][xPosition+1].equals("W") && !grid[yPosition][xPosition+1].equals("O"))
 		{
 			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
@@ -285,18 +298,21 @@ public class SaveWesteros extends SearchProblem{
 					  newGrid[i][j] = grid[i][j];
 			
 			ArrayList<String> newPath = new ArrayList<String>();
-			while(!path.isEmpty())
-			{
-				newPath.add(path.remove(0));
-			}
+//			while(!path.isEmpty())
+//			{
+//				newPath.add(path.remove(0));
+//			}
+			for(String currentDirection: path)
+				newPath.add(currentDirection);
 			
-			newPath.add("RIGHT");
+			newPath.add("RIGHT from " + xPosition + " " + yPosition);
 			
 			Node rightNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft, xPosition+1, yPosition, strategy, newGrid);
 			returnedNodes.add(rightNode);
 			
 		}
 		
+		// check up
 		if(yPosition > 0 && !visited[yPosition-1][xPosition] && !grid[yPosition-1][xPosition].equals("W") && !grid[yPosition-1][xPosition].equals("O"))
 		{
 			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
@@ -310,17 +326,19 @@ public class SaveWesteros extends SearchProblem{
 					  newGrid[i][j] = grid[i][j];
 			
 			ArrayList<String> newPath = new ArrayList<String>();
-			while(!path.isEmpty())
-			{
-				newPath.add(path.remove(0));
-			}
+//			while(!path.isEmpty())
+//			{
+//				newPath.add(path.remove(0));
+//			}
+			for(String currentDirection: path)
+				newPath.add(currentDirection);
 			
-			newPath.add("UP");
+			newPath.add("UP from " + xPosition + " " + yPosition);
 			
 			Node upNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft, xPosition, yPosition-1, strategy, newGrid);
 			returnedNodes.add(upNode);
 		}
-		
+		// check down
 		if(yPosition < world.getWorldRows()-1 && !visited[yPosition+1][xPosition] && !grid[yPosition+1][xPosition].equals("W") && !grid[yPosition+1][xPosition].equals("O"))
 		{
 			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
@@ -334,12 +352,15 @@ public class SaveWesteros extends SearchProblem{
 					  newGrid[i][j] = grid[i][j];
 			
 			ArrayList<String> newPath = new ArrayList<String>();
-			while(!path.isEmpty())
-			{
-				newPath.add(path.remove(0));
-			}
+//			while(!path.isEmpty())
+//			{
+//				newPath.add(path.remove(0));
+//			}
+			for(String currentDirection: path)
+				newPath.add(currentDirection);
 			
-			newPath.add("DOWN");
+//			System.out.println("I'm at " + xPosition + " " + yPosition);
+			newPath.add("DOWN from " + xPosition + " " + yPosition);
 			
 			Node downNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft, xPosition, yPosition+1, strategy, newGrid);
 			returnedNodes.add(downNode);
