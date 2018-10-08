@@ -19,7 +19,7 @@ public class Solution {
 		statement += "Path: ";
 		for(int i=0; i<this.path.size(); i++)
 		{
-			statement += this.path.get(i) + ", ";
+			statement += this.path.get(i) + ",\n ";
 		}
 		statement += "\n";
 		statement += "Cost: " + this.getCost() + "\n";

@@ -100,7 +100,10 @@ public class WesterosWorld {
 		}
 		
 		// infinite loop case
-		world = new String [][]{{"E", "E", "O", "W"}, {"W", "W", "E", "E"}, {"W", "D", "E", "E"}, {"E", "W", "W", "J"}};
+		world = new String [][]{{"E", "O", "E", "E"}, {"E", "W", "E", "E"}, {"D", "W", "W", "E"}, {"E", "O", "W", "J"}};
+		whiteWalkersCapacity = 4;
+		obstaclesCapacity = 2;
+		capacityOfDG = 5;
 		
 		
 		return world;
