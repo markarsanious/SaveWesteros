@@ -6,12 +6,14 @@ public class SaveWesteros extends SearchProblem {
 	private String[][] grid;
 	private WesterosWorld world;
 	private ArrayList<WesterosNode> sequenceofExpansion;
+	private ArrayList<Solution> solutions;
 
 	// better add reference to your world
 	// constructor
 	public SaveWesteros(WesterosWorld world) {
 		this.world = world;
 		this.sequenceofExpansion = new ArrayList<>();
+		this.solutions = new ArrayList<Solution>();
 	}
 
 	public Solution search(String[][] grid, SearchStrategies strategy, boolean visualization) {
@@ -122,14 +124,9 @@ public class SaveWesteros extends SearchProblem {
 			if (goalTest(firstNode)) {
 				// remove last move since it's an extra move after reaching the goal
 				castedNode.getPath().remove(castedNode.getPath().size() - 1);
-				// System.out.println(castedNode.getGrid());
-				// for(String x[]: castedNode.getGrid()) {
-				// for(String el: x)
-				// System.out.print(el + " ");
-				// System.out.println();
-				// }
 				return new Solution(castedNode.getPath(), castedNode.getCost(), this.sequenceofExpansion.size());
-			} else {
+			} 
+			else {
 				ArrayList<Node> nodes = this.expand(firstNode);
 				currentDS.enqueue(strategy, nodes);
 			}
@@ -162,7 +159,7 @@ public class SaveWesteros extends SearchProblem {
 		String currentCell = this.world.getWorld()[yPosition][xPosition];
 
 		// update the current cell as visited
-		oldVisited[xPosition][yPosition] = true;
+		oldVisited[yPosition][xPosition] = true;
 
 		// copy the the old grid
 		String[][] newNodeGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
@@ -189,7 +186,6 @@ public class SaveWesteros extends SearchProblem {
 
 		// sufficient dragonglass, look for white walkers
 		if (remainingDragonGlasses > 0) {
-			System.out.println("Reset visited");
 
 			int totalSurroundingWhiteWalkers = 0;
 
@@ -238,16 +234,16 @@ public class SaveWesteros extends SearchProblem {
 			// }
 
 		}
-		for(boolean [] visitedRow: newVisited) {
-			for(boolean xx: visitedRow)
-				System.out.print(xx + " ");
-			
-			System.out.println();
-			
-		}
-		System.out.println();
-		System.out.println();
-		System.out.println();
+//		for(boolean [] visitedRow: newVisited) {
+//			for(boolean xx: visitedRow)
+//				System.out.print(xx + " ");
+//			
+//			System.out.println();
+//			
+//		}
+//		System.out.println();
+//		System.out.println();
+//		System.out.println();
 
 		return this.getNeighbouringCells(whiteWalkersKilled, path, newVisited, remainingDragonGlasses, xPosition,
 				yPosition, strategy, pathCost, newNodeGrid);
