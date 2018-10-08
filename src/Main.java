@@ -5,7 +5,7 @@ public class Main {
 		WesterosWorld world = new WesterosWorld(4, 4);
 		String [][] grid = world.getWorld();
 		SaveWesteros westeros = new SaveWesteros(world);
-		westeros.search(grid, SearchStrategies.BF , false);
+		// westeros.search(grid, SearchStrategies.BF , false);
 		System.out.println("World Map:\n ");
 		for(int i=0; i<grid.length; i++)
 		{
@@ -18,7 +18,7 @@ public class Main {
 		System.out.println("\nCapacity of Dragon Glass: " + world.getCapacityOfDG());
 		Solution solution = westeros.search(grid, SearchStrategies.BF, false);
 		if(solution != null) {
-			System.out.println(solution);			
+			System.out.println(solution.toString());	
 		} else {
 			System.out.println("No solution was found.");
 		}

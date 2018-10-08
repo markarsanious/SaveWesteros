@@ -16,8 +16,14 @@ public class Solution {
 	
 	public String toString() {
 		String statement = "Found Solution:\n";
-		statement += "Path: \n";
-		statement += this.path.toString();
+		statement += "Path: ";
+		for(int i=0; i<this.path.size(); i++)
+		{
+			statement += this.path.get(i) + ",\n ";
+		}
+		statement += "\n";
+		statement += "Cost: " + this.getCost() + "\n";
+		statement += "Nodes Expanded: " + this.getNodesExpanded();
 		return statement;
 		
 	}
