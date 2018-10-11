@@ -23,6 +23,17 @@ public class WesterosNode extends Node {
 		this.grid = grid;
 	}
 	
+	public WesterosNode(int whiteWalkersKilled, int pathCost, ArrayList<String> path, boolean[][] visited,
+			int dragonGlassLeft, int xPosition, int yPosition, SearchStrategies strategy, String[][] grid, int level, int estimate) {
+		super(pathCost, level, strategy, estimate);
+		this.whiteWalkersKilled = whiteWalkersKilled;
+		this.path = path;
+		this.visited = visited;
+		this.dragonGlassLeft = dragonGlassLeft;
+		this.xPosition = xPosition;
+		this.yPosition = yPosition;
+		this.grid = grid;
+	}
 
 	public String toString() {
 		return "{Cost: " + this.getCost() + ", X: " + this.getxPosition() + ", Y: " + this.getyPosition() + "}";
