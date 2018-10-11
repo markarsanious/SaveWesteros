@@ -43,9 +43,13 @@ public class Node implements Comparable {
 
 	@Override
 	public int compareTo(Object o) {
-		if(strategy.equals(SearchStrategies.UC)){
-			return this.getCost() - ((WesterosNode)o).getCost();
+		switch(strategy)
+		{
+			case DF: return 1;
+			case BF: return -1;
+			case UC: return this.getCost() - ((WesterosNode)o).getCost();
 		}
+		
 		return 0;
 	}
 	

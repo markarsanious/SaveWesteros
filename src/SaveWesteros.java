@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 //subclass of SearchProblem
 public class SaveWesteros extends SearchProblem {
@@ -255,9 +256,7 @@ public class SaveWesteros extends SearchProblem {
 
 	@Override
 	GenericSearchDS makeQ(Node node) {
-		ArrayList<Node> currentNodes = new ArrayList<Node>();
-		currentNodes.add(node);
-		return new GenericSearchDS(currentNodes);
+		return new GenericSearchDS(node);
 	}
 
 	@Override
