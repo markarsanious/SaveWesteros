@@ -7,14 +7,16 @@ public class SaveWesteros extends SearchProblem {
 	private String[][] grid;
 	private WesterosWorld world;
 	private ArrayList<WesterosNode> sequenceofExpansion;
-	private ArrayList<Solution> solutions;
+	private int levelLimit;
+	
 
 	// better add reference to your world
 	// constructor
 	public SaveWesteros(WesterosWorld world) {
 		this.world = world;
 		this.sequenceofExpansion = new ArrayList<>();
-		this.solutions = new ArrayList<Solution>();
+		this.levelLimit = 0;
+		
 	}
 
 	public Solution search(String[][] grid, SearchStrategies strategy, boolean visualization) {
@@ -75,7 +77,22 @@ public class SaveWesteros extends SearchProblem {
 	@Override
 	public Solution IDS() {
 		// TODO Auto-generated method stub
-		return genericSearch(SearchStrategies.ID);
+		int nodesExpandedOld = 0;
+		Solution solution = null;
+		
+		do {
+			nodesExpandedOld = this.sequenceofExpansion.size();
+			this.sequenceofExpansion = new ArrayList<>();
+			
+			solution = genericSearch(SearchStrategies.ID);
+			
+			if(solution != null)
+				break;
+			
+			this.levelLimit++;
+		} while(nodesExpandedOld != this.sequenceofExpansion.size());
+		
+		return solution;
 	}
 
 	@Override
@@ -129,8 +146,13 @@ public class SaveWesteros extends SearchProblem {
 				castedNode.getPath().remove(castedNode.getPath().size() - 1);
 				return new Solution(castedNode.getPath(), castedNode.getCost(), this.sequenceofExpansion.size());
 			} else {
-				ArrayList<Node> nodes = this.expand(firstNode);
-				currentDS.enqueue(strategy, nodes);
+				
+				if(!castedNode.getStrategy().equals(SearchStrategies.ID) || 
+						(castedNode.getStrategy().equals(SearchStrategies.ID) && castedNode.getLevel()<= this.levelLimit ))
+				{
+					ArrayList<Node> nodes = this.expand(firstNode);
+					currentDS.enqueue(strategy, nodes);
+				}
 			}
 			/*
 			 * Steps missing: 1- Goal Test 2- expand current Node 3- Enqueue
@@ -230,24 +252,10 @@ public class SaveWesteros extends SearchProblem {
 				}
 			}
 
-			// TODO: Workaround, will need to change this
-			// do not expand if goal is reached
-			// if(goalTest(node)) {
-			// System.out.println("SIZE" + expandedNodes.size());
-			// return expandedNodes;
-			// }
+
 
 		}
-		// for(boolean [] visitedRow: newVisited) {
-		// for(boolean xx: visitedRow)
-		// System.out.print(xx + " ");
-		//
-		// System.out.println();
-		//
-		// }
-		// System.out.println();
-		// System.out.println();
-		// System.out.println();
+
 
 		return this.getNeighbouringCells(whiteWalkersKilled, path, newVisited, remainingDragonGlasses, xPosition,
 				yPosition, strategy, pathCost, newNodeGrid, oldLevel + 1);
