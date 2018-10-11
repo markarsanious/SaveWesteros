@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 //subclass of SearchProblem
 public class SaveWesteros extends SearchProblem {
@@ -105,12 +106,13 @@ public class SaveWesteros extends SearchProblem {
 	Solution genericSearch(SearchStrategies strategy) {
 		// TODO Auto-generated method stub
 		boolean[][] visited = new boolean[this.grid.length][this.grid[0].length];
-		Node initialState = new WesterosNode(0, 0, new ArrayList<String>(), visited, 0, 3, 3, strategy, this.grid);
+		Node initialState = new WesterosNode(0, 0, new ArrayList<String>(), visited, 0, 3, 3, strategy, this.grid, 0);
 		GenericSearchDS currentDS = makeQ(initialState);
 		/*
-		 * STEPS TO BE IMPLEMENTED inside the following loop: 1- check if empty return
-		 * null 2- dequeue 3- do the goal test on the dequeued node 4- expand current
-		 * Node 5- enqueue its children (return of the expand) one by on.
+		 * STEPS TO BE IMPLEMENTED inside the following loop: 1- check if empty
+		 * return null 2- dequeue 3- do the goal test on the dequeued node 4-
+		 * expand current Node 5- enqueue its children (return of the expand)
+		 * one by on.
 		 */
 
 		while (true) {
@@ -122,11 +124,11 @@ public class SaveWesteros extends SearchProblem {
 			// System.out.println(castedNode);
 
 			if (goalTest(firstNode)) {
-				// remove last move since it's an extra move after reaching the goal
+				// remove last move since it's an extra move after reaching the
+				// goal
 				castedNode.getPath().remove(castedNode.getPath().size() - 1);
 				return new Solution(castedNode.getPath(), castedNode.getCost(), this.sequenceofExpansion.size());
-			} 
-			else {
+			} else {
 				ArrayList<Node> nodes = this.expand(firstNode);
 				currentDS.enqueue(strategy, nodes);
 			}
@@ -154,6 +156,7 @@ public class SaveWesteros extends SearchProblem {
 		int yPosition = castedNode.getyPosition();
 		SearchStrategies strategy = castedNode.getStrategy();
 		int pathCost = castedNode.getCost(); // where to get the real cost?
+		int oldLevel = castedNode.getLevel();
 		String[][] nodeGrid = castedNode.getGrid();
 
 		String currentCell = this.world.getWorld()[yPosition][xPosition];
@@ -220,7 +223,8 @@ public class SaveWesteros extends SearchProblem {
 
 				path.add("Killed " + totalSurroundingWhiteWalkers);
 
-				// no dragonglass found, reset visited array and new goal is dragonstone
+				// no dragonglass found, reset visited array and new goal is
+				// dragonstone
 				if (oldDragonGlasses > 0 && remainingDragonGlasses == 0) {
 					newVisited = new boolean[newVisited.length][newVisited[0].length];
 				}
@@ -234,27 +238,25 @@ public class SaveWesteros extends SearchProblem {
 			// }
 
 		}
-//		for(boolean [] visitedRow: newVisited) {
-//			for(boolean xx: visitedRow)
-//				System.out.print(xx + " ");
-//			
-//			System.out.println();
-//			
-//		}
-//		System.out.println();
-//		System.out.println();
-//		System.out.println();
+		// for(boolean [] visitedRow: newVisited) {
+		// for(boolean xx: visitedRow)
+		// System.out.print(xx + " ");
+		//
+		// System.out.println();
+		//
+		// }
+		// System.out.println();
+		// System.out.println();
+		// System.out.println();
 
 		return this.getNeighbouringCells(whiteWalkersKilled, path, newVisited, remainingDragonGlasses, xPosition,
-				yPosition, strategy, pathCost, newNodeGrid);
+				yPosition, strategy, pathCost, newNodeGrid, oldLevel + 1);
 
 	}
 
 	@Override
 	GenericSearchDS makeQ(Node node) {
-		ArrayList<Node> currentNodes = new ArrayList<Node>();
-		currentNodes.add(node);
-		return new GenericSearchDS(currentNodes);
+		return new GenericSearchDS(node);
 	}
 
 	@Override
@@ -270,7 +272,7 @@ public class SaveWesteros extends SearchProblem {
 
 	private ArrayList<Node> getNeighbouringCells(int whiteWalkersKilled, ArrayList<String> path, boolean[][] visited,
 			int dragonGlassesLeft, int xPosition, int yPosition, SearchStrategies strategy, int pathCost,
-			String[][] grid) {
+			String[][] grid, int level) {
 		ArrayList<Node> returnedNodes = new ArrayList<Node>();
 
 		// check left
@@ -299,7 +301,7 @@ public class SaveWesteros extends SearchProblem {
 			newPath.add("LEFT from " + yPosition + " " + xPosition);
 
 			Node leftNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition - 1, yPosition, strategy, newGrid);
+					xPosition - 1, yPosition, strategy, newGrid, level);
 			returnedNodes.add(leftNode);
 		}
 
@@ -327,7 +329,7 @@ public class SaveWesteros extends SearchProblem {
 			newPath.add("RIGHT from " + yPosition + " " + xPosition + " to " + grid[yPosition][xPosition + 1]);
 
 			Node rightNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition + 1, yPosition, strategy, newGrid);
+					xPosition + 1, yPosition, strategy, newGrid, level);
 			returnedNodes.add(rightNode);
 
 		}
@@ -356,7 +358,7 @@ public class SaveWesteros extends SearchProblem {
 			newPath.add("UP from " + yPosition + " " + xPosition);
 
 			Node upNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition, yPosition - 1, strategy, newGrid);
+					xPosition, yPosition - 1, strategy, newGrid, level);
 			returnedNodes.add(upNode);
 		}
 		// check down
@@ -384,7 +386,7 @@ public class SaveWesteros extends SearchProblem {
 			newPath.add("DOWN from " + yPosition + " " + xPosition);
 
 			Node downNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition, yPosition + 1, strategy, newGrid);
+					xPosition, yPosition + 1, strategy, newGrid, level);
 			returnedNodes.add(downNode);
 		}
 
