@@ -5,10 +5,20 @@ public class WesterosWorld {
 	private int whiteWalkersCapacity;
 	private int worldRows;
 	private int worldCols;
+	private int[][] whiteWalkersPositions;
+	
 	
 	public WesterosWorld(int x, int y) {
 		this.world = this.genGrid(x, y);
 	}
+	
+	public int[][] getWhiteWalkersPositions() {
+		return whiteWalkersPositions;
+	}
+	public void setWhiteWalkersPositions(int[][] whiteWalkersPositions) {
+		this.whiteWalkersPositions = whiteWalkersPositions;
+	}
+	
 	public int getWorldRows() {
 		return worldRows;
 	}
@@ -46,7 +56,8 @@ public class WesterosWorld {
 		this.worldRows = y;
 		this.worldCols = x;
 		this.whiteWalkersCapacity = (int)(Math.random()*((worldRows*worldCols)/2))+1; //randomly picking ww capcity up to 1/2 the world
-		//this.whiteWalkersCapacity = 1;
+		this.whiteWalkersPositions = new int[this.whiteWalkersCapacity][2];
+		
 		int obstaclesCapacity = (int)(Math.random()*((worldRows*worldCols)/8))+1; //randomly picking obstacles capcity up to 1/8 the world
 		
 		//generate empty world with Jon Snow
@@ -84,6 +95,8 @@ public class WesterosWorld {
 			if(world[randomRow][randomCol] == "E")
 			{
 				world[randomRow][randomCol] = "W";
+				whiteWalkersPositions[whiteWalkersCreated][0]= randomRow;
+				whiteWalkersPositions[whiteWalkersCreated][1]= randomCol;
 				whiteWalkersCreated++;
 			}
 		}

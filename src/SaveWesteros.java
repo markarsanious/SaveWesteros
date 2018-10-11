@@ -7,15 +7,22 @@ public class SaveWesteros extends SearchProblem {
 	private String[][] grid;
 	private WesterosWorld world;
 	private ArrayList<WesterosNode> sequenceofExpansion;
-	private ArrayList<Solution> solutions;
 	private boolean visualization;
+	private int levelLimit;
+	private static final int KILL_COST = 10;
+	private static final int STEP_COST = 1;
+
+	static int[] yList = { 0, 0, -1, 1 };
+	static int[] xList = { -1, 1, 0, 0 };
+	static String[] direction = {"L", "R", "U", "D"};
 
 	// better add reference to your world
 	// constructor
 	public SaveWesteros(WesterosWorld world) {
 		this.world = world;
 		this.sequenceofExpansion = new ArrayList<>();
-		this.solutions = new ArrayList<Solution>();
+		this.levelLimit = 0;
+
 	}
 
 	public Solution search(String[][] grid, SearchStrategies strategy, boolean visualization) {
@@ -77,7 +84,22 @@ public class SaveWesteros extends SearchProblem {
 	@Override
 	public Solution IDS() {
 		// TODO Auto-generated method stub
-		return genericSearch(SearchStrategies.ID);
+		int nodesExpandedOld = 0;
+		Solution solution = null;
+
+		do {
+			nodesExpandedOld = this.sequenceofExpansion.size();
+			this.sequenceofExpansion = new ArrayList<>();
+
+			solution = genericSearch(SearchStrategies.ID);
+
+			if (solution != null)
+				break;
+
+			this.levelLimit++;
+		} while (nodesExpandedOld != this.sequenceofExpansion.size());
+
+		return solution;
 	}
 
 	@Override
@@ -102,6 +124,23 @@ public class SaveWesteros extends SearchProblem {
 	public Solution AS2() {
 		// TODO Auto-generated method stub
 		return genericSearch(SearchStrategies.AS2);
+	}
+	
+	private int h1(int yPosition, int xPosition){
+		int min=10000;
+		
+		for (int[] i : this.world.getWhiteWalkersPositions())
+		{
+			int currentDistance = Math.abs(yPosition - i[0]) + Math.abs(xPosition - i[1]);
+			min = Math.min(min, currentDistance);
+		}
+		return min-1;
+	}
+	
+	private int h2(int yPosition, int xPosition, int whiteWalkersKilled){
+		int minDistance = h1(yPosition, xPosition);
+		int remainingWhiteWalkersCost = (this.world.getWhiteWalkersCapacity() - whiteWalkersKilled)*10 /3;
+		return minDistance + remainingWhiteWalkersCost;
 	}
 
 	@Override
@@ -136,8 +175,13 @@ public class SaveWesteros extends SearchProblem {
 				}
 				return solution;
 			} else {
-				ArrayList<Node> nodes = this.expand(firstNode);
-				currentDS.enqueue(strategy, nodes);
+
+				if (!castedNode.getStrategy().equals(SearchStrategies.ID)
+						|| (castedNode.getStrategy().equals(SearchStrategies.ID)
+								&& castedNode.getLevel() <= this.levelLimit)) {
+					ArrayList<Node> nodes = this.expand(firstNode);
+					currentDS.enqueue(strategy, nodes);
+				}
 			}
 			/*
 			 * Steps missing: 1- Goal Test 2- expand current Node 3- Enqueue
@@ -226,7 +270,7 @@ public class SaveWesteros extends SearchProblem {
 				int oldDragonGlasses = remainingDragonGlasses;
 				remainingDragonGlasses -= 1;
 				// cost is increased by 10 when using a dragon glass
-				pathCost += 10;
+				pathCost += KILL_COST;
 
 				// path.add("Killed " + totalSurroundingWhiteWalkers);
 
@@ -237,24 +281,7 @@ public class SaveWesteros extends SearchProblem {
 				}
 			}
 
-			// TODO: Workaround, will need to change this
-			// do not expand if goal is reached
-			// if(goalTest(node)) {
-			// System.out.println("SIZE" + expandedNodes.size());
-			// return expandedNodes;
-			// }
-
 		}
-		// for(boolean [] visitedRow: newVisited) {
-		// for(boolean xx: visitedRow)
-		// System.out.print(xx + " ");
-		//
-		// System.out.println();
-		//
-		// }
-		// System.out.println();
-		// System.out.println();
-		// System.out.println();
 
 		return this.getNeighbouringCells(whiteWalkersKilled, path, newVisited, remainingDragonGlasses, xPosition,
 				yPosition, strategy, pathCost, newNodeGrid, oldLevel + 1);
@@ -305,116 +332,67 @@ public class SaveWesteros extends SearchProblem {
 			}
 			System.out.println();
 		}
-		System.out.println();
+		System.out.println("------------------------\n");
 	}
-	private ArrayList<Node> getNeighbouringCells(int whiteWalkersKilled, ArrayList<PathObject> path,
-			boolean[][] visited, int dragonGlassesLeft, int xPosition, int yPosition, SearchStrategies strategy,
-			int pathCost, String[][] grid, int level) {
+
+	// check if the move is a valid one
+	private boolean canMove(int i, boolean[][] visited, String[][] grid, int xPosition, int yPosition) {
+		return (yPosition + yList[i]) >= 0 && (xPosition + xList[i]) >= 0 && (yPosition + yList[i]) < grid.length
+				&& (xPosition + xList[i]) < grid.length && !visited[yPosition + yList[i]][xPosition + xList[i]]
+				&& !grid[yPosition + yList[i]][xPosition + xList[i]].equals("W")
+				&& !grid[yPosition][xPosition + xList[i]].equals("O");
+	}
+	
+	private int calculateEstimate(int yPosition, int xPosition, int whiteWalkersKilled, SearchStrategies strategy)
+	{
+		int estimate = 0;
+		switch(strategy)
+		{
+			case GR1: 
+			case AS1: estimate = h1(yPosition, xPosition); break;
+			case GR2:
+			case AS2: estimate = h2(yPosition, xPosition, whiteWalkersKilled); break;
+		}
+		return estimate;
+	}
+
+
+
+	private ArrayList<Node> getNeighbouringCells(int whiteWalkersKilled, ArrayList<PathObject> path, boolean[][] visited,
+			int dragonGlassesLeft, int xPosition, int yPosition, SearchStrategies strategy, int pathCost,
+			String[][] grid, int level) {
 		ArrayList<Node> returnedNodes = new ArrayList<Node>();
 
-		// check left
-		if (xPosition > 0 && !visited[yPosition][xPosition - 1] && !grid[yPosition][xPosition - 1].equals("W")
-				&& !grid[yPosition][xPosition - 1].equals("O")) {
-			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
-			// cloning visited array by value not reference; O(n*m)
-			// TODO: enhance this?
-			for (int i = 0; i < visited.length; i++)
-				for (int j = 0; j < visited[i].length; j++)
-					newVisited[i][j] = visited[i][j];
+		// check the 4 directions
+		for (int iteration = 0; iteration < xList.length; iteration++) {
+			if (canMove(iteration, visited, grid, xPosition, yPosition)) {
+				boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
+				// cloning visited array by value not reference; O(n*m)
+				// TODO: enhance this?
+				for (int i = 0; i < visited.length; i++)
+					for (int j = 0; j < visited[i].length; j++)
+						newVisited[i][j] = visited[i][j];
 
-			String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
-			for (int i = 0; i < grid.length; i++)
-				for (int j = 0; j < grid[i].length; j++)
-					newGrid[i][j] = grid[i][j];
+				String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
+				for (int i = 0; i < grid.length; i++)
+					for (int j = 0; j < grid[i].length; j++)
+						newGrid[i][j] = grid[i][j];
 
-			ArrayList<PathObject> newPath = new ArrayList<PathObject>();
+				ArrayList<PathObject> newPath = new ArrayList<PathObject>();
 
-			for (PathObject currentDirection : path)
-				newPath.add(currentDirection);
+				for (PathObject currentDirection : path)
+					newPath.add(currentDirection);
+
+				newPath.add(new PathObject(direction[iteration], newGrid, (xPosition + xList[iteration]), (yPosition + yList[iteration])));
+				
 			
-			int newX = xPosition - 1;
-			newPath.add(new PathObject("L", newGrid, newX, yPosition));
 
-			Node leftNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					newX, yPosition, strategy, newGrid, level);
-			returnedNodes.add(leftNode);
-		}
-
-		// check right
-		if (xPosition < world.getWorldCols() - 1 && !visited[yPosition][xPosition + 1]
-				&& !grid[yPosition][xPosition + 1].equals("W") && !grid[yPosition][xPosition + 1].equals("O")) {
-			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
-			for (int i = 0; i < visited.length; i++)
-				for (int j = 0; j < visited[i].length; j++)
-					newVisited[i][j] = visited[i][j];
-
-			String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
-			for (int i = 0; i < grid.length; i++)
-				for (int j = 0; j < grid[i].length; j++)
-					newGrid[i][j] = grid[i][j];
-
-			ArrayList<PathObject> newPath = new ArrayList<PathObject>();
-
-			for (PathObject currentDirection : path)
-				newPath.add(currentDirection);
-			int newX = xPosition + 1;
-			newPath.add(new PathObject("R", newGrid, newX, yPosition));
-
-			Node rightNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					newX, yPosition, strategy, newGrid, level);
-			returnedNodes.add(rightNode);
-
-		}
-
-		// check up
-		if (yPosition > 0 && !visited[yPosition - 1][xPosition] && !grid[yPosition - 1][xPosition].equals("W")
-				&& !grid[yPosition - 1][xPosition].equals("O")) {
-			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
-			for (int i = 0; i < visited.length; i++)
-				for (int j = 0; j < visited[i].length; j++)
-					newVisited[i][j] = visited[i][j];
-
-			String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
-			for (int i = 0; i < grid.length; i++)
-				for (int j = 0; j < grid[i].length; j++)
-					newGrid[i][j] = grid[i][j];
-
-			ArrayList<PathObject> newPath = new ArrayList<PathObject>();
-
-			for (PathObject currentDirection : path)
-				newPath.add(currentDirection);
-			int newY = yPosition - 1;
-
-			newPath.add(new PathObject("U", newGrid, xPosition, newY));
-
-			Node upNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition, newY, strategy, newGrid, level);
-			returnedNodes.add(upNode);
-		}
-		// check down
-		if (yPosition < world.getWorldRows() - 1 && !visited[yPosition + 1][xPosition]
-				&& !grid[yPosition + 1][xPosition].equals("W") && !grid[yPosition + 1][xPosition].equals("O")) {
-			boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
-			for (int i = 0; i < visited.length; i++)
-				for (int j = 0; j < visited[i].length; j++)
-					newVisited[i][j] = visited[i][j];
-
-			String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
-			for (int i = 0; i < grid.length; i++)
-				for (int j = 0; j < grid[i].length; j++)
-					newGrid[i][j] = grid[i][j];
-
-			ArrayList<PathObject> newPath = new ArrayList<PathObject>();
-
-			for (PathObject currentDirection : path)
-				newPath.add(currentDirection);
-
-			int newY = yPosition + 1;
-			newPath.add(new PathObject("D", newGrid, xPosition, newY));
-
-			Node downNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition, newY, strategy, newGrid, level);
-			returnedNodes.add(downNode);
+				int estimate = calculateEstimate(yPosition+yList[iteration], xPosition+xList[iteration], whiteWalkersKilled, strategy);
+				
+				Node newNode = new WesterosNode(whiteWalkersKilled, pathCost + STEP_COST, newPath, newVisited,
+						dragonGlassesLeft, xPosition + xList[iteration], yPosition + yList[iteration], strategy, newGrid, level, estimate);
+				returnedNodes.add(newNode);
+			}
 		}
 
 		return returnedNodes;
