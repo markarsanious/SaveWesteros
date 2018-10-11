@@ -4,14 +4,14 @@ import java.util.Collections;
 //A class representing our search tree node with information needed about the path
 public class WesterosNode extends Node {
 	private int whiteWalkersKilled;
-	private ArrayList <String> path;
+	private ArrayList <PathObject> path;
 	private boolean[][] visited;
 	private int dragonGlassLeft;
 	private int xPosition;
 	private int yPosition;
 	private String[][] grid;
 	
-	public WesterosNode(int whiteWalkersKilled, int pathCost, ArrayList<String> path, boolean[][] visited,
+	public WesterosNode(int whiteWalkersKilled, int pathCost, ArrayList<PathObject> path, boolean[][] visited,
 			int dragonGlassLeft, int xPosition, int yPosition, SearchStrategies strategy, String[][] grid, int level) {
 		super(pathCost, level, strategy);
 		this.whiteWalkersKilled = whiteWalkersKilled;
@@ -34,10 +34,10 @@ public class WesterosNode extends Node {
 	public void setWhiteWalkersKilled(int whiteWalkersKilled) {
 		this.whiteWalkersKilled = whiteWalkersKilled;
 	}
-	public ArrayList<String> getPath() {
+	public ArrayList<PathObject> getPath() {
 		return path;
 	}
-	public void setPath(ArrayList<String> path) {
+	public void setPath(ArrayList<PathObject> path) {
 		this.path = path;
 	}
 	public boolean[][] getVisited() {

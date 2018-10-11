@@ -8,6 +8,7 @@ public class SaveWesteros extends SearchProblem {
 	private WesterosWorld world;
 	private ArrayList<WesterosNode> sequenceofExpansion;
 	private ArrayList<Solution> solutions;
+	private boolean visualization;
 
 	// better add reference to your world
 	// constructor
@@ -20,6 +21,7 @@ public class SaveWesteros extends SearchProblem {
 	public Solution search(String[][] grid, SearchStrategies strategy, boolean visualization) {
 		// TODO Auto-generated method stub
 		this.grid = grid;
+		this.setVisualization(visualization);
 		Solution solution = null;
 		switch (strategy) {
 		case BF:
@@ -106,13 +108,13 @@ public class SaveWesteros extends SearchProblem {
 	Solution genericSearch(SearchStrategies strategy) {
 		// TODO Auto-generated method stub
 		boolean[][] visited = new boolean[this.grid.length][this.grid[0].length];
-		Node initialState = new WesterosNode(0, 0, new ArrayList<String>(), visited, 0, 3, 3, strategy, this.grid, 0);
+		Node initialState = new WesterosNode(0, 0, new ArrayList<PathObject>(), visited, 0, 3, 3, strategy, this.grid,
+				0);
 		GenericSearchDS currentDS = makeQ(initialState);
 		/*
-		 * STEPS TO BE IMPLEMENTED inside the following loop: 1- check if empty
-		 * return null 2- dequeue 3- do the goal test on the dequeued node 4-
-		 * expand current Node 5- enqueue its children (return of the expand)
-		 * one by on.
+		 * STEPS TO BE IMPLEMENTED inside the following loop: 1- check if empty return
+		 * null 2- dequeue 3- do the goal test on the dequeued node 4- expand current
+		 * Node 5- enqueue its children (return of the expand) one by on.
 		 */
 
 		while (true) {
@@ -127,7 +129,12 @@ public class SaveWesteros extends SearchProblem {
 				// remove last move since it's an extra move after reaching the
 				// goal
 				castedNode.getPath().remove(castedNode.getPath().size() - 1);
-				return new Solution(castedNode.getPath(), castedNode.getCost(), this.sequenceofExpansion.size());
+				Solution solution = new Solution(castedNode.getPath(), castedNode.getCost(),
+						this.sequenceofExpansion.size());
+				if (this.visualization) {
+					this.visualize(solution);
+				}
+				return solution;
 			} else {
 				ArrayList<Node> nodes = this.expand(firstNode);
 				currentDS.enqueue(strategy, nodes);
@@ -149,7 +156,7 @@ public class SaveWesteros extends SearchProblem {
 
 		// get current state attributes
 		int whiteWalkersKilled = castedNode.getWhiteWalkersKilled();
-		ArrayList<String> path = castedNode.getPath();
+		ArrayList<PathObject> path = castedNode.getPath();
 		boolean[][] oldVisited = castedNode.getVisited();
 		int remainingDragonGlasses = castedNode.getDragonGlassLeft();
 		int xPosition = castedNode.getxPosition();
@@ -182,7 +189,7 @@ public class SaveWesteros extends SearchProblem {
 		// if dragonstone found, recharge
 		if (currentCell == "D") {
 			remainingDragonGlasses = this.world.getCapacityOfDG();
-			path.add("Recharged dragonglass");
+			// path.add("Recharged dragonglass");
 			oldVisited = new boolean[world.getWorldRows()][world.getWorldCols()];
 
 		}
@@ -221,7 +228,7 @@ public class SaveWesteros extends SearchProblem {
 				// cost is increased by 10 when using a dragon glass
 				pathCost += 10;
 
-				path.add("Killed " + totalSurroundingWhiteWalkers);
+				// path.add("Killed " + totalSurroundingWhiteWalkers);
 
 				// no dragonglass found, reset visited array and new goal is
 				// dragonstone
@@ -270,9 +277,39 @@ public class SaveWesteros extends SearchProblem {
 		return false;
 	}
 
-	private ArrayList<Node> getNeighbouringCells(int whiteWalkersKilled, ArrayList<String> path, boolean[][] visited,
-			int dragonGlassesLeft, int xPosition, int yPosition, SearchStrategies strategy, int pathCost,
-			String[][] grid, int level) {
+	private void visualize(Solution solution) {
+		System.out.println("Visualizing..");
+		ArrayList<PathObject> path = solution.getPath();
+
+		System.out.println("Original Grid\n");
+		this.printGrid(grid, true);
+		
+		for (PathObject pathObj : path) {
+			System.out.println("Moving: " + pathObj.getDirection() + "\n");
+			String[][] grid = pathObj.getGrid();
+			grid[pathObj.getJonY()][pathObj.getJonX()] = "J";
+			this.printGrid(grid, false);
+			System.out.println();
+		}
+		System.out.println("Finished Visualization.");
+	}
+	
+	private void printGrid(String [][] grid, boolean original) {
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[i].length; j++) {
+				if (i == grid.length -1 && j == grid[i].length -1 && original) {
+					System.out.print("J ");						
+				} else {
+					System.out.print(grid[i][j] + " ");										
+				}
+			}
+			System.out.println();
+		}
+		System.out.println();
+	}
+	private ArrayList<Node> getNeighbouringCells(int whiteWalkersKilled, ArrayList<PathObject> path,
+			boolean[][] visited, int dragonGlassesLeft, int xPosition, int yPosition, SearchStrategies strategy,
+			int pathCost, String[][] grid, int level) {
 		ArrayList<Node> returnedNodes = new ArrayList<Node>();
 
 		// check left
@@ -290,18 +327,16 @@ public class SaveWesteros extends SearchProblem {
 				for (int j = 0; j < grid[i].length; j++)
 					newGrid[i][j] = grid[i][j];
 
-			ArrayList<String> newPath = new ArrayList<String>();
-			// while(!path.isEmpty())
-			// {
-			// newPath.add(path.remove(0));
-			// }
-			for (String currentDirection : path)
-				newPath.add(currentDirection);
+			ArrayList<PathObject> newPath = new ArrayList<PathObject>();
 
-			newPath.add("LEFT from " + yPosition + " " + xPosition);
+			for (PathObject currentDirection : path)
+				newPath.add(currentDirection);
+			
+			int newX = xPosition - 1;
+			newPath.add(new PathObject("L", newGrid, newX, yPosition));
 
 			Node leftNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition - 1, yPosition, strategy, newGrid, level);
+					newX, yPosition, strategy, newGrid, level);
 			returnedNodes.add(leftNode);
 		}
 
@@ -318,18 +353,15 @@ public class SaveWesteros extends SearchProblem {
 				for (int j = 0; j < grid[i].length; j++)
 					newGrid[i][j] = grid[i][j];
 
-			ArrayList<String> newPath = new ArrayList<String>();
-			// while(!path.isEmpty())
-			// {
-			// newPath.add(path.remove(0));
-			// }
-			for (String currentDirection : path)
-				newPath.add(currentDirection);
+			ArrayList<PathObject> newPath = new ArrayList<PathObject>();
 
-			newPath.add("RIGHT from " + yPosition + " " + xPosition + " to " + grid[yPosition][xPosition + 1]);
+			for (PathObject currentDirection : path)
+				newPath.add(currentDirection);
+			int newX = xPosition + 1;
+			newPath.add(new PathObject("R", newGrid, newX, yPosition));
 
 			Node rightNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition + 1, yPosition, strategy, newGrid, level);
+					newX, yPosition, strategy, newGrid, level);
 			returnedNodes.add(rightNode);
 
 		}
@@ -347,18 +379,16 @@ public class SaveWesteros extends SearchProblem {
 				for (int j = 0; j < grid[i].length; j++)
 					newGrid[i][j] = grid[i][j];
 
-			ArrayList<String> newPath = new ArrayList<String>();
-			// while(!path.isEmpty())
-			// {
-			// newPath.add(path.remove(0));
-			// }
-			for (String currentDirection : path)
-				newPath.add(currentDirection);
+			ArrayList<PathObject> newPath = new ArrayList<PathObject>();
 
-			newPath.add("UP from " + yPosition + " " + xPosition);
+			for (PathObject currentDirection : path)
+				newPath.add(currentDirection);
+			int newY = yPosition - 1;
+
+			newPath.add(new PathObject("U", newGrid, xPosition, newY));
 
 			Node upNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition, yPosition - 1, strategy, newGrid, level);
+					xPosition, newY, strategy, newGrid, level);
 			returnedNodes.add(upNode);
 		}
 		// check down
@@ -374,23 +404,28 @@ public class SaveWesteros extends SearchProblem {
 				for (int j = 0; j < grid[i].length; j++)
 					newGrid[i][j] = grid[i][j];
 
-			ArrayList<String> newPath = new ArrayList<String>();
-			// while(!path.isEmpty())
-			// {
-			// newPath.add(path.remove(0));
-			// }
-			for (String currentDirection : path)
+			ArrayList<PathObject> newPath = new ArrayList<PathObject>();
+
+			for (PathObject currentDirection : path)
 				newPath.add(currentDirection);
 
-			// System.out.println("I'm at " + yPosition + " " + xPosition);
-			newPath.add("DOWN from " + yPosition + " " + xPosition);
+			int newY = yPosition + 1;
+			newPath.add(new PathObject("D", newGrid, xPosition, newY));
 
 			Node downNode = new WesterosNode(whiteWalkersKilled, pathCost, newPath, newVisited, dragonGlassesLeft,
-					xPosition, yPosition + 1, strategy, newGrid, level);
+					xPosition, newY, strategy, newGrid, level);
 			returnedNodes.add(downNode);
 		}
 
 		return returnedNodes;
+	}
+
+	public boolean isVisualization() {
+		return visualization;
+	}
+
+	public void setVisualization(boolean visualization) {
+		this.visualization = visualization;
 	}
 
 }
