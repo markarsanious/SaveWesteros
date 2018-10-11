@@ -68,7 +68,8 @@ public class WesterosWorld {
 			for(int j=0; j<world[i].length; j++)
 			{
 				if(i==world.length-1 && j==world[i].length -1)
-					world[i][j] = "J";
+//					world[i][j] = "J";
+					world[i][j] = "E";
 				else
 					world[i][j]="E";
 			}
@@ -113,10 +114,10 @@ public class WesterosWorld {
 		}
 		
 		// infinite loop case
-		world = new String [][]{{"E", "O", "D", "E"}, {"E", "W", "E", "E"}, {"E", "W", "W", "E"}, {"E", "O", "W", "J"}};
+		world = new String [][]{{"E", "O", "E", "E"}, {"E", "W", "E", "E"}, {"E", "W", "W", "D"}, {"E", "O", "W", "E"}};
 		whiteWalkersCapacity = 4;
 		obstaclesCapacity = 2;
-		capacityOfDG = 1;
+		capacityOfDG = 5;
 		
 		
 		return world;
