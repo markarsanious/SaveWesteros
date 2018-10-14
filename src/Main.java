@@ -3,7 +3,7 @@ public class Main {
 	
 	public static void main(String [] args) {
 		
-		WesterosWorld world = new WesterosWorld(6, 6);
+		WesterosWorld world = new WesterosWorld(4, 4);
 		SaveWesteros westeros = new SaveWesteros(world);
 
 		System.out.println("World Map:\n ");

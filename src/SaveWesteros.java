@@ -1,9 +1,7 @@
 import java.util.ArrayList;
-import java.util.PriorityQueue;
 
-//subclass of SearchProblem
 public class SaveWesteros extends SearchProblem {
-	// duplicate attribute in WestrosWorld!
+
 	private String[][] grid;
 	private WesterosWorld world;
 	private ArrayList<WesterosNode> sequenceofExpansion;
@@ -14,76 +12,58 @@ public class SaveWesteros extends SearchProblem {
 
 	static int[] yList = { 0, 0, -1, 1 };
 	static int[] xList = { -1, 1, 0, 0 };
-	static String[] direction = {"L", "R", "U", "D"};
+	static String[] direction = { "L", "R", "U", "D" };
 
-	// better add reference to your world
-	// constructor
 	public SaveWesteros(WesterosWorld world) {
 		this.world = world;
 		this.sequenceofExpansion = new ArrayList<>();
 		this.levelLimit = 0;
-
 	}
 
 	public Solution search(String[][] grid, SearchStrategies strategy, boolean visualization) {
-		// TODO Auto-generated method stub
 		this.grid = grid;
 		this.setVisualization(visualization);
-		Solution solution = null;
+
 		switch (strategy) {
 		case BF:
-			solution = BFS();
-			break;
+			return BFS();
 		case DF:
-			solution = DFS();
-			break;
+			return DFS();
 		case UC:
-			solution = UCS();
-			break;
+			return UCS();
 		case ID:
-			solution = IDS();
-			break;
+			return IDS();
 		case GR1:
-			solution = GR1();
-			break;
+			return GR1();
 		case GR2:
-			solution = GR2();
-			break;
+			return GR2();
 		case AS1:
-			solution = AS1();
-			break;
+			return AS1();
 		case AS2:
-			solution = AS2();
-			break;
+			return AS2();
 		default:
-			break;
+			return BFS();
 		}
 
-		return solution;
 	}
 
 	@Override
 	public Solution BFS() {
-		// TODO Auto-generated method stub
-
 		return genericSearch(SearchStrategies.BF);
 	}
 
 	@Override
 	public Solution DFS() {
-		// TODO Auto-generated method stub
 		return genericSearch(SearchStrategies.DF);
 	}
 
 	@Override
 	public Solution UCS() {
-		// TODO Auto-generated method stub
 		return genericSearch(SearchStrategies.UC);
 	}
 
 	@Override
 	public Solution IDS() {
-		// TODO Auto-generated method stub
 		int nodesExpandedOld = 0;
 		Solution solution = null;
 
@@ -104,59 +84,52 @@ public class SaveWesteros extends SearchProblem {
 
 	@Override
 	public Solution GR1() {
-		// TODO Auto-generated method stub
 		return genericSearch(SearchStrategies.GR1);
 	}
 
 	@Override
 	public Solution GR2() {
-		// TODO Auto-generated method stub
 		return genericSearch(SearchStrategies.GR2);
 	}
 
 	@Override
 	public Solution AS1() {
-		// TODO Auto-generated method stub
 		return genericSearch(SearchStrategies.AS1);
 	}
 
 	@Override
 	public Solution AS2() {
-		// TODO Auto-generated method stub
 		return genericSearch(SearchStrategies.AS2);
 	}
-	
-	private int h1(int yPosition, int xPosition){
-		int min=10000;
-		
-		for (int[] i : this.world.getWhiteWalkersPositions())
-		{
+
+	private int h1(int yPosition, int xPosition) {
+		int min = 10000;
+
+		for (int[] i : this.world.getWhiteWalkersPositions()) {
 			int currentDistance = Math.abs(yPosition - i[0]) + Math.abs(xPosition - i[1]);
 			min = Math.min(min, currentDistance);
 		}
-		return min-1;
+		return min - 1;
 	}
-	
-	private int h2(int yPosition, int xPosition, int whiteWalkersKilled){
+
+	private int h2(int yPosition, int xPosition, int whiteWalkersKilled) {
 		int minDistance = h1(yPosition, xPosition);
-		int remainingWhiteWalkersCost = (this.world.getWhiteWalkersCapacity() - whiteWalkersKilled)*10 /3;
+		int remainingWhiteWalkersCost = (this.world.getWhiteWalkersCapacity() - whiteWalkersKilled) * 10 / 3;
 		return minDistance + remainingWhiteWalkersCost;
 	}
 
+	/*
+	 * Mimic of the generic search function in the lectures
+	 */
 	@Override
 	Solution genericSearch(SearchStrategies strategy) {
-		// TODO Auto-generated method stub
 		boolean[][] visited = new boolean[this.grid.length][this.grid[0].length];
 		Position jonSnow = new Position(this.grid.length - 1, this.grid[0].length - 1);
-		Node initialState = new WesterosNode(0, 0, new ArrayList<PathObject>(), visited, 0, jonSnow, strategy, this.grid,
-				0);
+		Node initialState = new WesterosNode(0, 0, new ArrayList<PathObject>(), visited, 0, jonSnow, strategy,
+				this.grid, 0);
 		GenericSearchDS currentDS = makeQ(initialState);
-		/*
-		 * STEPS TO BE IMPLEMENTED inside the following loop: 1- check if empty return
-		 * null 2- dequeue 3- do the goal test on the dequeued node 4- expand current
-		 * Node 5- enqueue its children (return of the expand) one by on.
-		 */
 
+		// Loop till DS is empty
 		while (true) {
 			if (currentDS.isEmpty())
 				return null;
@@ -165,8 +138,8 @@ public class SaveWesteros extends SearchProblem {
 			WesterosNode castedNode = (WesterosNode) firstNode;
 
 			if (goalTest(firstNode)) {
-				// remove last move since it's an extra move after reaching the
-				// goal
+				// Remove the last move since it's an extra move after reaching
+				// the goal
 				castedNode.getPath().remove(castedNode.getPath().size() - 1);
 				Solution solution = new Solution(castedNode.getPath(), castedNode.getCost(),
 						this.sequenceofExpansion.size());
@@ -176,24 +149,22 @@ public class SaveWesteros extends SearchProblem {
 				return solution;
 			} else {
 
+				// Expand only if strategy is not ID, or it is ID and we are
+				// within the level limit
 				if (!castedNode.getStrategy().equals(SearchStrategies.ID)
 						|| (castedNode.getStrategy().equals(SearchStrategies.ID)
 								&& castedNode.getLevel() <= this.levelLimit)) {
 					ArrayList<Node> nodes = this.expand(firstNode);
-					currentDS.enqueue(strategy, nodes);
+					currentDS.enqueue(nodes);
 				}
 			}
-			/*
-			 * Steps missing: 1- Goal Test 2- expand current Node 3- Enqueue
-			 */
+
 		}
 
 	}
 
 	@Override
 	ArrayList<Node> expand(Node node) {
-		// Initialise return value
-		// ArrayList<Node> expandedNodes = new ArrayList<Node>();
 
 		WesterosNode castedNode = (WesterosNode) (node);
 		this.sequenceofExpansion.add(castedNode);
@@ -205,7 +176,7 @@ public class SaveWesteros extends SearchProblem {
 		int remainingDragonGlasses = castedNode.getDragonGlassLeft();
 		int xPosition = castedNode.getPosition().getX();
 		int yPosition = castedNode.getPosition().getY();
-		
+
 		SearchStrategies strategy = castedNode.getStrategy();
 		int pathCost = castedNode.getCost(); // where to get the real cost?
 		int oldLevel = castedNode.getLevel();
@@ -216,64 +187,45 @@ public class SaveWesteros extends SearchProblem {
 		// update the current cell as visited
 		oldVisited[yPosition][xPosition] = true;
 
-		// copy the the old grid
+		// copy the the old grid and old visited
 		String[][] newNodeGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
-		for (int i = 0; i < nodeGrid.length; i++)
-			for (int j = 0; j < nodeGrid[i].length; j++)
-				newNodeGrid[i][j] = nodeGrid[i][j];
-
-		// copy old visited array
 		boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
-		for (int i = 0; i < oldVisited.length; i++)
-			for (int j = 0; j < oldVisited[i].length; j++)
+		for (int i = 0; i < nodeGrid.length; i++)
+			for (int j = 0; j < nodeGrid[i].length; j++) {
+				newNodeGrid[i][j] = nodeGrid[i][j];
 				newVisited[i][j] = oldVisited[i][j];
+			}
 
-		// if no dragon glasses left, look for dragonstone
-		// otherwise look for white walkers
-
-		// if dragonstone found, recharge
+		// Recharge dragonglass if on dragonstone cell
 		if (currentCell == "D") {
+			// Reset visited only if our goal was the dragonstone
+			if (remainingDragonGlasses == 0)
+				oldVisited = new boolean[world.getWorldRows()][world.getWorldCols()];
 			remainingDragonGlasses = this.world.getCapacityOfDG();
-			// path.add("Recharged dragonglass");
-			oldVisited = new boolean[world.getWorldRows()][world.getWorldCols()];
 
 		}
 
-		// sufficient dragonglass, look for white walkers
+		// Sufficient dragonglass, look for white walkers
 		if (remainingDragonGlasses > 0) {
 
 			int totalSurroundingWhiteWalkers = 0;
 
 			// check 4 neighboring cells and kill white walkers if found
-			if (xPosition > 0 && nodeGrid[yPosition][xPosition - 1] == "W") {
-
-				totalSurroundingWhiteWalkers += 1;
-				newNodeGrid[yPosition][xPosition - 1] = "E";
+			for (int direction = 0; direction < xList.length; direction++) {
+				if ((yPosition + yList[direction]) >= 0 && (xPosition + xList[direction]) >= 0
+						&& (yPosition + yList[direction]) < grid.length && (xPosition + xList[direction]) < grid.length
+						&& nodeGrid[yPosition + yList[direction]][xPosition + xList[direction]] == "W") {
+					totalSurroundingWhiteWalkers += 1;
+					newNodeGrid[yPosition + yList[direction]][xPosition + xList[direction]] = "E";
+				}
 			}
-			if (xPosition < (this.world.getWorldCols() - 1) && nodeGrid[yPosition][xPosition + 1] == "W") {
-				totalSurroundingWhiteWalkers += 1;
-				newNodeGrid[yPosition][xPosition + 1] = "E";
-			}
-			if (yPosition > 0 && nodeGrid[yPosition - 1][xPosition] == "W") {
-				totalSurroundingWhiteWalkers += 1;
-				newNodeGrid[yPosition - 1][xPosition] = "E";
-			}
-			if (yPosition < (this.world.getWorldRows() - 1) && nodeGrid[yPosition + 1][xPosition] == "W") {
-				totalSurroundingWhiteWalkers += 1;
-				newNodeGrid[yPosition + 1][xPosition] = "E";
-			}
-
-			// System.out.println("Killed: " + totalSurroundingWhiteWalkers);
 
 			if (totalSurroundingWhiteWalkers > 0 && remainingDragonGlasses > 0) {
 				whiteWalkersKilled += totalSurroundingWhiteWalkers;
-				// TODO: what if knives is zero?
 				int oldDragonGlasses = remainingDragonGlasses;
 				remainingDragonGlasses -= 1;
-				// cost is increased by 10 when using a dragon glass
+				// Path cost is increased by KILL_COST when using a dragon glass
 				pathCost += KILL_COST;
-
-				// path.add("Killed " + totalSurroundingWhiteWalkers);
 
 				// no dragonglass found, reset visited array and new goal is
 				// dragonstone
@@ -296,47 +248,11 @@ public class SaveWesteros extends SearchProblem {
 
 	@Override
 	boolean goalTest(Node node) {
-		// check if zero white walkers => done
-		// else, check for dragon stones
-		WesterosNode castedNode = (WesterosNode) node;
-		if (castedNode.getWhiteWalkersKilled() == this.world.getWhiteWalkersCapacity()) {
-			return true;
-		}
-		return false;
+		// All white walkers killed?
+		return ((WesterosNode) node).getWhiteWalkersKilled() == this.world.getWhiteWalkersCapacity();
 	}
 
-	private void visualize(Solution solution) {
-		System.out.println("Visualizing..");
-		ArrayList<PathObject> path = solution.getPath();
-
-		System.out.println("Original Grid\n");
-		this.printGrid(grid, true);
-		
-		for (PathObject pathObj : path) {
-			System.out.println("Moving: " + pathObj.getDirection() + "\n");
-			String[][] grid = pathObj.getGrid();
-			grid[pathObj.getJonY()][pathObj.getJonX()] = "J";
-			this.printGrid(grid, false);
-			System.out.println();
-		}
-		System.out.println("Finished Visualization.");
-	}
-	
-	private void printGrid(String [][] grid, boolean original) {
-		for (int i = 0; i < grid.length; i++) {
-			for (int j = 0; j < grid[i].length; j++) {
-				if (i == grid.length -1 && j == grid[i].length -1 && original) {
-					System.out.print("J ");						
-				} else {
-					System.out.print(grid[i][j] + " ");										
-				}
-			}
-			System.out.println();
-		}
-		System.out.println("------------------------\n");
-	}
-
-	// check if the move is a valid one
+	// Checks if the move is a valid one
 	private boolean canMove(int i, boolean[][] visited, String[][] grid, int xPosition, int yPosition) {
 
 		return (yPosition + yList[i]) >= 0 && (xPosition + xList[i]) >= 0 && (yPosition + yList[i]) < grid.length
@@ -344,52 +260,56 @@ public class SaveWesteros extends SearchProblem {
 				&& !grid[yPosition + yList[i]][xPosition + xList[i]].equals("W")
 				&& !grid[yPosition][xPosition + xList[i]].equals("O");
 	}
-	
-	private int calculateEstimate(int yPosition, int xPosition, int whiteWalkersKilled, SearchStrategies strategy)
-	{
+
+	private int calculateEstimate(int yPosition, int xPosition, int whiteWalkersKilled, SearchStrategies strategy) {
 		int estimate = 0;
-		switch(strategy)
-		{
-			case GR1: 
-			case AS1: estimate = h1(yPosition, xPosition); break;
-			case GR2:
-			case AS2: estimate = h2(yPosition, xPosition, whiteWalkersKilled); break;
+		switch (strategy) {
+		case GR1:
+		case AS1:
+			estimate = h1(yPosition, xPosition);
+			break;
+		case GR2:
+		case AS2:
+			estimate = h2(yPosition, xPosition, whiteWalkersKilled);
+			break;
+		default:
+			break;
 		}
 		return estimate;
 	}
 
-
-
-	private ArrayList<Node> getNeighbouringCells(int whiteWalkersKilled, ArrayList<PathObject> path, boolean[][] visited,
-			int dragonGlassesLeft, int xPosition, int yPosition, SearchStrategies strategy, int pathCost,
-			String[][] grid, int level) {
+	private ArrayList<Node> getNeighbouringCells(int whiteWalkersKilled, ArrayList<PathObject> path,
+			boolean[][] visited, int dragonGlassesLeft, int xPosition, int yPosition, SearchStrategies strategy,
+			int pathCost, String[][] grid, int level) {
 		ArrayList<Node> returnedNodes = new ArrayList<Node>();
 
-		// check the 4 directions
+		// Check the 4 directions
 		for (int iteration = 0; iteration < xList.length; iteration++) {
+			// Can the player move in that direction?
 			if (canMove(iteration, visited, grid, xPosition, yPosition)) {
-				boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
-				// cloning visited array by value not reference; O(n*m)
-				// TODO: enhance this?
-				for (int i = 0; i < visited.length; i++)
-					for (int j = 0; j < visited[i].length; j++)
-						newVisited[i][j] = visited[i][j];
 
+				// Copy old values
+				boolean[][] newVisited = new boolean[this.world.getWorldRows()][this.world.getWorldCols()];
 				String[][] newGrid = new String[this.world.getWorldRows()][this.world.getWorldCols()];
-				for (int i = 0; i < grid.length; i++)
-					for (int j = 0; j < grid[i].length; j++)
+				// Visited and Grid are always the same dimensions
+				for (int i = 0; i < visited.length; i++)
+					for (int j = 0; j < visited[i].length; j++) {
+						newVisited[i][j] = visited[i][j];
 						newGrid[i][j] = grid[i][j];
+					}
 
 				ArrayList<PathObject> newPath = new ArrayList<PathObject>();
 
 				for (PathObject currentDirection : path)
 					newPath.add(currentDirection);
 
-				newPath.add(new PathObject(direction[iteration], newGrid, (xPosition + xList[iteration]), (yPosition + yList[iteration])));
-				
-			
+				// Add the new direction to the path array
+				newPath.add(new PathObject(direction[iteration], newGrid, (xPosition + xList[iteration]),
+						(yPosition + yList[iteration])));
 
-				int estimate = calculateEstimate(yPosition+yList[iteration], xPosition+xList[iteration], whiteWalkersKilled, strategy);
+				// Calculate estimates cost for this direction
+				int estimate = calculateEstimate(yPosition + yList[iteration], xPosition + xList[iteration],
+						whiteWalkersKilled, strategy);
 				Position newPos = new Position(xPosition + xList[iteration], yPosition + yList[iteration]);
 				Node newNode = new WesterosNode(whiteWalkersKilled, pathCost + STEP_COST, newPath, newVisited,
 						dragonGlassesLeft, newPos, strategy, newGrid, level, estimate);
@@ -406,6 +326,37 @@ public class SaveWesteros extends SearchProblem {
 
 	public void setVisualization(boolean visualization) {
 		this.visualization = visualization;
+	}
+
+	private void visualize(Solution solution) {
+		System.out.println("Visualizing..");
+		ArrayList<PathObject> path = solution.getPath();
+
+		System.out.println("Original Grid\n");
+		this.printGrid(grid, true);
+
+		for (PathObject pathObj : path) {
+			System.out.println("Moving: " + pathObj.getDirection() + "\n");
+			String[][] grid = pathObj.getGrid();
+			grid[pathObj.getJonY()][pathObj.getJonX()] = "J";
+			this.printGrid(grid, false);
+			System.out.println();
+		}
+		System.out.println("Finished Visualization.");
+	}
+
+	private void printGrid(String[][] grid, boolean original) {
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[i].length; j++) {
+				if (i == grid.length - 1 && j == grid[i].length - 1 && original) {
+					System.out.print("J ");
+				} else {
+					System.out.print(grid[i][j] + " ");
+				}
+			}
+			System.out.println();
+		}
+		System.out.println("------------------------\n");
 	}
 
 }
