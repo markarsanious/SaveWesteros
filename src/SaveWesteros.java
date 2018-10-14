@@ -147,7 +147,8 @@ public class SaveWesteros extends SearchProblem {
 	Solution genericSearch(SearchStrategies strategy) {
 		// TODO Auto-generated method stub
 		boolean[][] visited = new boolean[this.grid.length][this.grid[0].length];
-		Node initialState = new WesterosNode(0, 0, new ArrayList<PathObject>(), visited, 0, 3, 3, strategy, this.grid,
+		Position jonSnow = new Position(this.grid.length - 1, this.grid[0].length - 1);
+		Node initialState = new WesterosNode(0, 0, new ArrayList<PathObject>(), visited, 0, jonSnow, strategy, this.grid,
 				0);
 		GenericSearchDS currentDS = makeQ(initialState);
 		/*
@@ -162,7 +163,6 @@ public class SaveWesteros extends SearchProblem {
 
 			Node firstNode = currentDS.dequeue();
 			WesterosNode castedNode = (WesterosNode) firstNode;
-			// System.out.println(castedNode);
 
 			if (goalTest(firstNode)) {
 				// remove last move since it's an extra move after reaching the
@@ -203,8 +203,9 @@ public class SaveWesteros extends SearchProblem {
 		ArrayList<PathObject> path = castedNode.getPath();
 		boolean[][] oldVisited = castedNode.getVisited();
 		int remainingDragonGlasses = castedNode.getDragonGlassLeft();
-		int xPosition = castedNode.getxPosition();
-		int yPosition = castedNode.getyPosition();
+		int xPosition = castedNode.getPosition().getX();
+		int yPosition = castedNode.getPosition().getY();
+		
 		SearchStrategies strategy = castedNode.getStrategy();
 		int pathCost = castedNode.getCost(); // where to get the real cost?
 		int oldLevel = castedNode.getLevel();
@@ -337,6 +338,7 @@ public class SaveWesteros extends SearchProblem {
 
 	// check if the move is a valid one
 	private boolean canMove(int i, boolean[][] visited, String[][] grid, int xPosition, int yPosition) {
+
 		return (yPosition + yList[i]) >= 0 && (xPosition + xList[i]) >= 0 && (yPosition + yList[i]) < grid.length
 				&& (xPosition + xList[i]) < grid.length && !visited[yPosition + yList[i]][xPosition + xList[i]]
 				&& !grid[yPosition + yList[i]][xPosition + xList[i]].equals("W")
@@ -388,9 +390,9 @@ public class SaveWesteros extends SearchProblem {
 			
 
 				int estimate = calculateEstimate(yPosition+yList[iteration], xPosition+xList[iteration], whiteWalkersKilled, strategy);
-				
+				Position newPos = new Position(xPosition + xList[iteration], yPosition + yList[iteration]);
 				Node newNode = new WesterosNode(whiteWalkersKilled, pathCost + STEP_COST, newPath, newVisited,
-						dragonGlassesLeft, xPosition + xList[iteration], yPosition + yList[iteration], strategy, newGrid, level, estimate);
+						dragonGlassesLeft, newPos, strategy, newGrid, level, estimate);
 				returnedNodes.add(newNode);
 			}
 		}
