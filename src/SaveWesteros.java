@@ -169,7 +169,7 @@ public class SaveWesteros extends SearchProblem {
 				// goal
 				castedNode.getPath().remove(castedNode.getPath().size() - 1);
 				Solution solution = new Solution(castedNode.getPath(), castedNode.getCost(),
-						this.sequenceofExpansion.size());
+						this.sequenceofExpansion.size(), strategy);
 				if (this.visualization) {
 					this.visualize(solution);
 				}
