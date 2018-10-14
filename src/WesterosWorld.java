@@ -6,8 +6,7 @@ public class WesterosWorld {
 	private int worldRows;
 	private int worldCols;
 	private int[][] whiteWalkersPositions;
-	
-	
+
 	public WesterosWorld(int x, int y) {
 		this.world = this.genGrid(x, y);
 	}
@@ -50,15 +49,14 @@ public class WesterosWorld {
 
 	public String[][] genGrid(int x, int y){
 		
-		this.capacityOfDG = (int)(Math.random()*5) +1; //random capacity between 1->5
-		//int worldRows = (int)(Math.random()*7) +4; //randomly picking rows
-		//int worldCols = (int)(Math.random()*7) +4; //randomly picking cols
+		this.capacityOfDG = (int)(Math.random()*5) +1; // random capacity between 1->5
+
 		this.worldRows = y;
 		this.worldCols = x;
-		this.whiteWalkersCapacity = (int)(Math.random()*((worldRows*worldCols)/2))+1; //randomly picking ww capcity up to 1/2 the world
+		this.whiteWalkersCapacity = (int)(Math.random()*((worldRows*worldCols)/2))+1; // randomly picking ww capcity up to 1/2 the world
 		this.whiteWalkersPositions = new int[this.whiteWalkersCapacity][2];
 		
-		int obstaclesCapacity = (int)(Math.random()*((worldRows*worldCols)/8))+1; //randomly picking obstacles capcity up to 1/8 the world
+		int obstaclesCapacity = (int)(Math.random()*((worldRows*worldCols)/8))+1; // randomly picking obstacles capcity up to 1/8 the world
 		
 		//generate empty world with Jon Snow
 		String[][] world = new String[worldRows][worldCols];
@@ -68,7 +66,6 @@ public class WesterosWorld {
 			for(int j=0; j<world[i].length; j++)
 			{
 				if(i==world.length-1 && j==world[i].length -1)
-//					world[i][j] = "J";
 					world[i][j] = "E";
 				else
 					world[i][j]="E";
@@ -113,13 +110,25 @@ public class WesterosWorld {
 			}
 		}
 		
-		// infinite loop case
-		world = new String [][]{{"E", "O", "E", "E"}, {"E", "W", "E", "E"}, {"E", "W", "W", "D"}, {"E", "O", "W", "E"}};
-		whiteWalkersCapacity = 4;
-		obstaclesCapacity = 2;
-		capacityOfDG = 5;
 		
 		
 		return world;
+	}
+	
+	public String toString() {
+		String mapStr = "";
+		String[][] grid = this.getWorld();
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[i].length; j++) {
+				if (i == grid.length -1 && j == grid[i].length -1) {
+					mapStr += "J ";			
+				} else {
+					mapStr += grid[i][j];
+					mapStr += " ";
+				}
+			}
+			mapStr += "\n";
+		}
+		return mapStr;
 	}
 }

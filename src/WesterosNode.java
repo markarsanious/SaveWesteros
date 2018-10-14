@@ -1,42 +1,71 @@
 import java.util.ArrayList;
 import java.util.Collections;
-
+class Position {
+	private int x;
+	public int getX() {
+		return x;
+	}
+	public void setX(int x) {
+		this.x = x;
+	}
+	public int getY() {
+		return y;
+	}
+	public void setY(int y) {
+		this.y = y;
+	}
+	private int y;
+	Position(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	public String toString() {
+		return "X: " + this.getX() + ", Y: " + this.getY();
+	}
+}
 //A class representing our search tree node with information needed about the path
 public class WesterosNode extends Node {
 	private int whiteWalkersKilled;
 	private ArrayList <PathObject> path;
 	private boolean[][] visited;
 	private int dragonGlassLeft;
-	private int xPosition;
-	private int yPosition;
+	private Position position;
+	
+	public Position getPosition() {
+		return position;
+	}
+
+	public void setPosition(Position position) {
+		this.position = position;
+	}
+
 	private String[][] grid;
 	
 	public WesterosNode(int whiteWalkersKilled, int pathCost, ArrayList<PathObject> path, boolean[][] visited,
-			int dragonGlassLeft, int xPosition, int yPosition, SearchStrategies strategy, String[][] grid, int level) {
+			int dragonGlassLeft, Position position, SearchStrategies strategy, String[][] grid, int level) {
 		super(pathCost, level, strategy);
 		this.whiteWalkersKilled = whiteWalkersKilled;
 		this.path = path;
 		this.visited = visited;
 		this.dragonGlassLeft = dragonGlassLeft;
-		this.xPosition = xPosition;
-		this.yPosition = yPosition;
+		this.position = position;
 		this.grid = grid;
 	}
 	
 	public WesterosNode(int whiteWalkersKilled, int pathCost, ArrayList<PathObject> path, boolean[][] visited,
-			int dragonGlassLeft, int xPosition, int yPosition, SearchStrategies strategy, String[][] grid, int level, int estimate) {
+			int dragonGlassLeft, Position position, SearchStrategies strategy, String[][] grid, int level, int estimate) {
 		super(pathCost, level, strategy, estimate);
 		this.whiteWalkersKilled = whiteWalkersKilled;
 		this.path = path;
 		this.visited = visited;
 		this.dragonGlassLeft = dragonGlassLeft;
-		this.xPosition = xPosition;
-		this.yPosition = yPosition;
+		this.position = position;
 		this.grid = grid;
 	}
 
 	public String toString() {
-		return "{Cost: " + this.getCost() + ", X: " + this.getxPosition() + ", Y: " + this.getyPosition() + "}";
+		return "{Cost: " + this.getCost() + ", X: " + this.getPosition().getX() + ", Y: " + this.getPosition().getY() + "}";
 	}
 	
 	public int getWhiteWalkersKilled() {
@@ -63,20 +92,6 @@ public class WesterosNode extends Node {
 	public void setDragonGlassLeft(int dragonGlassLeft) {
 		this.dragonGlassLeft = dragonGlassLeft;
 	}
-	public int getxPosition() {
-		return xPosition;
-	}
-	public void setxPosition(int xPosition) {
-		this.xPosition = xPosition;
-	}
-	public int getyPosition() {
-		return yPosition;
-	}
-	public void setyPosition(int yPosition) {
-		this.yPosition = yPosition;
-	}
-
-
 	
 	public String[][] getGrid() {
 		return grid;
