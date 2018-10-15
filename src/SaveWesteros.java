@@ -4,7 +4,6 @@ public class SaveWesteros extends SearchProblem {
 
 	private String[][] grid;
 	private WesterosWorld world;
-	private ArrayList<WesterosNode> sequenceofExpansion;
 	private boolean visualization;
 	private int levelLimit;
 	private static final int KILL_COST = 10;
@@ -15,9 +14,8 @@ public class SaveWesteros extends SearchProblem {
 	static String[] direction = { "L", "R", "U", "D" };
 
 	public SaveWesteros(WesterosWorld world) {
+		super();
 		this.world = world;
-		this.sequenceofExpansion = new ArrayList<>();
-		this.levelLimit = 0;
 	}
 
 	public Solution search(String[][] grid, SearchStrategies strategy, boolean visualization) {
@@ -47,60 +45,7 @@ public class SaveWesteros extends SearchProblem {
 
 	}
 
-	@Override
-	public Solution BFS() {
-		return genericSearch(SearchStrategies.BF);
-	}
-
-	@Override
-	public Solution DFS() {
-		return genericSearch(SearchStrategies.DF);
-	}
-
-	@Override
-	public Solution UCS() {
-		return genericSearch(SearchStrategies.UC);
-	}
-
-	@Override
-	public Solution IDS() {
-		int nodesExpandedOld = 0;
-		Solution solution = null;
-
-		do {
-			nodesExpandedOld = this.sequenceofExpansion.size();
-			this.sequenceofExpansion = new ArrayList<>();
-
-			solution = genericSearch(SearchStrategies.ID);
-
-			if (solution != null)
-				break;
-
-			this.levelLimit++;
-		} while (nodesExpandedOld != this.sequenceofExpansion.size());
-
-		return solution;
-	}
-
-	@Override
-	public Solution GR1() {
-		return genericSearch(SearchStrategies.GR1);
-	}
-
-	@Override
-	public Solution GR2() {
-		return genericSearch(SearchStrategies.GR2);
-	}
-
-	@Override
-	public Solution AS1() {
-		return genericSearch(SearchStrategies.AS1);
-	}
-
-	@Override
-	public Solution AS2() {
-		return genericSearch(SearchStrategies.AS2);
-	}
+	
 
 	private int h1(int yPosition, int xPosition) {
 		int min = 10000;
@@ -142,7 +87,7 @@ public class SaveWesteros extends SearchProblem {
 				// the goal
 				castedNode.getPath().remove(castedNode.getPath().size() - 1);
 				Solution solution = new Solution(castedNode.getPath(), castedNode.getCost(),
-						this.sequenceofExpansion.size(), strategy);
+						this.getSequenceofExpansion().size(), strategy);
 				if (this.visualization) {
 					this.visualize(solution);
 				}
@@ -167,8 +112,7 @@ public class SaveWesteros extends SearchProblem {
 	ArrayList<Node> expand(Node node) {
 
 		WesterosNode castedNode = (WesterosNode) (node);
-		this.sequenceofExpansion.add(castedNode);
-
+		this.getSequenceofExpansion().add(castedNode);
 		// get current state attributes
 		int whiteWalkersKilled = castedNode.getWhiteWalkersKilled();
 		ArrayList<PathObject> path = castedNode.getPath();
@@ -211,7 +155,7 @@ public class SaveWesteros extends SearchProblem {
 			int totalSurroundingWhiteWalkers = 0;
 
 			// check 4 neighboring cells and kill white walkers if found
-			for (int direction = 0; direction < xList.length; direction++) {
+		for (int direction = 0; direction < xList.length; direction++) {
 				if ((yPosition + yList[direction]) >= 0 && (xPosition + xList[direction]) >= 0
 						&& (yPosition + yList[direction]) < grid.length && (xPosition + xList[direction]) < grid.length
 						&& nodeGrid[yPosition + yList[direction]][xPosition + xList[direction]] == "W") {
@@ -227,8 +171,8 @@ public class SaveWesteros extends SearchProblem {
 				// Path cost is increased by KILL_COST when using a dragon glass
 				pathCost += KILL_COST;
 
-				// no dragonglass found, reset visited array and new goal is
-				// dragonstone
+				// no dragon-glass found, reset visited array and new goal is
+				// dragon-stone
 				if (oldDragonGlasses > 0 && remainingDragonGlasses == 0) {
 					newVisited = new boolean[newVisited.length][newVisited[0].length];
 				}
@@ -357,6 +301,12 @@ public class SaveWesteros extends SearchProblem {
 			System.out.println();
 		}
 		System.out.println("------------------------\n");
+	}
+
+	@Override
+	Solution executeSearch(SearchStrategies strategy, boolean visualization) {
+		// TODO Auto-generated method stub
+		return this.search(this.world.getWorld(), strategy, visualization);
 	}
 
 }

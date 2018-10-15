@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
+import javax.xml.transform.SourceLocator;
+
 public class Main {
 		
 	public static void display(ArrayList v) {
@@ -25,14 +27,13 @@ public class Main {
 		for (SearchStrategies strategy : SearchStrategies.values()) {
 			// do what you want
 			Solution solution;
-			solution = westeros.search(world.getWorld(), strategy, false);
+			solution = westeros.executeSearch(strategy, false);
 			if(solution != null) {
 				solutions.add(solution);
 			}
 		}
 		
 		System.out.println("\nFinished searching...\n-----------------\n");
-        
 		if(solutions.size() > 0) {
 			Collections.sort(solutions, new SortByCost());
 			System.out.println("Printing optimal solution: ");
@@ -41,6 +42,7 @@ public class Main {
 			System.out.println("-----------------");
 			
 			Collections.sort(solutions, new SortByNodesExpanded());
+			display(solutions);
 
 			System.out.println("Printing most efficent solution:");
 			System.out.println(solutions.get(0));	
