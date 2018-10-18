@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 // Not generic
 // Class representing the solution object with the needed info
 class PathObject {
@@ -42,22 +43,26 @@ class PathObject {
 		JonX = jonX;
 	}
 }
-public class Solution {
+public class Solution implements Comparable {
 	private ArrayList<PathObject> path;
 	private int cost;
 	private int nodesExpanded;
+	private SearchStrategies strategy;
 	
-	
-	public Solution(ArrayList<PathObject> path, int cost, int nodesExpanded) {
+	public Solution(ArrayList<PathObject> path, int cost, int nodesExpanded, SearchStrategies strategy) {
 		super();
 		this.path = path;
 		this.cost = cost;
 		this.nodesExpanded = nodesExpanded;
+		this.setStrategy(strategy);
 	}
 	
 	public String toString() {
-		String statement = "Found Solution:\n";
-		statement += "Path: ";
+		String statement = "\n";
+		statement += "Strategy: ";
+		statement += this.getStrategy();
+		
+		statement += "\nPath: ";
 		for(int i=0; i<this.path.size(); i++)
 		{
 			statement += this.path.get(i).getDirection() + ", ";
@@ -86,4 +91,36 @@ public class Solution {
 	public void setNodesExpanded(int nodesExpanded) {
 		this.nodesExpanded = nodesExpanded;
 	}
+
+	@Override
+	public int compareTo(Object other) {
+		// TODO Auto-generated method stub
+		return this.getNodesExpanded() - ((Solution)other).getNodesExpanded();
+	}
+
+	public SearchStrategies getStrategy() {
+		return strategy;
+	}
+
+	public void setStrategy(SearchStrategies strategy) {
+		this.strategy = strategy;
+	}
 }
+
+class SortByCost implements Comparator<Solution> 
+{ 
+    public int compare(Solution a, Solution b) 
+    { 
+        return a.getCost() - b.getCost(); 
+    } 
+} 
+  
+
+class SortByNodesExpanded implements Comparator<Solution> 
+{ 
+    public int compare(Solution a, Solution b) 
+    { 
+        return a.getNodesExpanded() - b.getNodesExpanded(); 
+    } 
+} 
+  
