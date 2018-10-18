@@ -20,6 +20,7 @@ public class Main {
 		System.out.println("World Map:\n ");
 		System.out.print(world);
 		System.out.println("\nCapacity of Dragon Glass: " + world.getCapacityOfDG());
+		System.out.println("\nNumber of white walkers: " + world.getWhiteWalkersCapacity());
 		
 		System.out.println("\nSearching for solution...");
 
@@ -42,10 +43,12 @@ public class Main {
 			System.out.println("-----------------");
 			
 			Collections.sort(solutions, new SortByNodesExpanded());
-			display(solutions);
 
 			System.out.println("Printing most efficent solution:");
 			System.out.println(solutions.get(0));	
+			System.out.println("-----------------");
+
+			display(solutions);
 		} else {
 			System.out.println("No solution was found.");
 		}

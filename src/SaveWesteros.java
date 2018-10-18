@@ -144,7 +144,7 @@ public class SaveWesteros extends SearchProblem {
 		if (currentCell == "D") {
 			// Reset visited only if our goal was the dragonstone
 			if (remainingDragonGlasses == 0)
-				oldVisited = new boolean[world.getWorldRows()][world.getWorldCols()];
+				newVisited = new boolean[world.getWorldRows()][world.getWorldCols()];
 			remainingDragonGlasses = this.world.getCapacityOfDG();
 
 		}
@@ -154,7 +154,7 @@ public class SaveWesteros extends SearchProblem {
 
 			int totalSurroundingWhiteWalkers = 0;
 
-			// check 4 neighboring cells and kill white walkers if found
+		// check 4 neighbouring cells and kill white walkers if found
 		for (int direction = 0; direction < xList.length; direction++) {
 				if ((yPosition + yList[direction]) >= 0 && (xPosition + xList[direction]) >= 0
 						&& (yPosition + yList[direction]) < grid.length && (xPosition + xList[direction]) < grid.length
@@ -170,6 +170,9 @@ public class SaveWesteros extends SearchProblem {
 				remainingDragonGlasses -= 1;
 				// Path cost is increased by KILL_COST when using a dragon glass
 				pathCost += KILL_COST;
+				// after thinking of special cases, we decided to reset each time we kill
+				// in order not to get stuck
+				newVisited = new boolean[world.getWorldRows()][world.getWorldCols()];
 
 				// no dragon-glass found, reset visited array and new goal is
 				// dragon-stone
