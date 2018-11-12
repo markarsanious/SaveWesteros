@@ -1,0 +1,10 @@
+dragonGlass(3,1).
+whiteWalker(4,4).
+whiteWalker(2,4).
+whiteWalker(2,2).
+obstacle(2,3).
+obstacle(2,0).
+jonSnow(4,4).
+maxGlass(5).
+remWalkers(3).
+gridShape(5,5).
